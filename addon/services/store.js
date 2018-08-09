@@ -78,6 +78,22 @@ export default Service.extend({
 
   /**
    * @param {string} type
+   * @param {fetchCallback} fetchCallback
+   * @return {Promise} Resolves to queried records
+   * @function
+   */
+  query(type, fetchCallback) {
+    this.initializeType(type);
+
+    return fetchCallback().then((records) => {
+      records.forEach(record => this.addRecordWithoutTriggeringSubscriptions(type, record));
+
+      return records;
+    });
+  },
+
+  /**
+   * @param {string} type
    * @param {Array.<Object>} records
    * @function
    */

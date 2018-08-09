@@ -15,7 +15,8 @@ module('Unit | Service | store', function (hooks) {
         {
           id: '1',
           name: 'Foo',
-        }, {
+        },
+        {
           id: '2',
           name: 'Bar',
         },
@@ -39,7 +40,8 @@ module('Unit | Service | store', function (hooks) {
         {
           id: '1',
           name: 'Foo',
-        }, {
+        },
+        {
           id: '2',
           name: 'Bar',
         },
@@ -61,7 +63,8 @@ module('Unit | Service | store', function (hooks) {
         {
           id: '1',
           name: 'Foo',
-        }, {
+        },
+        {
           id: '2',
           name: 'Bar',
         },
@@ -100,7 +103,8 @@ module('Unit | Service | store', function (hooks) {
         {
           id: '1',
           name: 'Foo',
-        }, {
+        },
+        {
           id: '2',
           name: 'Bar',
         },
@@ -160,6 +164,56 @@ module('Unit | Service | store', function (hooks) {
     });
   });
 
+  module('function: query', function () {
+    test('should return all fetched records for a type', async function (assert) {
+      assert.expect(1);
+
+      // Arrange
+      const records = [
+        {
+          id: '1',
+          name: 'Foo',
+        },
+        {
+          id: '2',
+          name: 'Bar',
+        },
+      ];
+      const service = this.owner.lookup('service:store');
+
+      // Act
+      const result = await service.query('user', () => Promise.resolve(records));
+
+      // Assert
+      assert.deepEqual(result, records);
+    });
+
+    test('should cache all fetched records for a type', async function (assert) {
+      assert.expect(1);
+
+      // Arrange
+      const records = [
+        {
+          id: '1',
+          name: 'Foo',
+        },
+        {
+          id: '2',
+          name: 'Bar',
+        },
+      ];
+      const service = this.owner.lookup('service:store');
+
+      await service.query('user', () => Promise.resolve(records));
+
+      // Act
+      const result = service.getAll('user');
+
+      // Assert
+      assert.deepEqual(result, records);
+    });
+  });
+
   module('function: setRecord', function () {
     test('should set the record for a type', function (assert) {
       assert.expect(1);
@@ -169,7 +223,8 @@ module('Unit | Service | store', function (hooks) {
         {
           id: '1',
           name: 'Foo',
-        }, {
+        },
+        {
           id: '2',
           name: 'Bar',
         },
@@ -191,7 +246,8 @@ module('Unit | Service | store', function (hooks) {
         {
           id: '1',
           name: 'Foo',
-        }, {
+        },
+        {
           id: '2',
           name: 'Bar',
         },
@@ -266,7 +322,8 @@ module('Unit | Service | store', function (hooks) {
         {
           id: '1',
           name: 'Foo',
-        }, {
+        },
+        {
           id: '2',
           name: 'Bar',
         },
@@ -299,7 +356,8 @@ module('Unit | Service | store', function (hooks) {
         {
           id: '1',
           name: 'Foo',
-        }, {
+        },
+        {
           id: '2',
           name: 'Bar',
         },
@@ -340,7 +398,8 @@ module('Unit | Service | store', function (hooks) {
         {
           id: '1',
           name: 'Foo',
-        }, {
+        },
+        {
           id: '2',
           name: 'Bar',
         },
@@ -371,7 +430,8 @@ module('Unit | Service | store', function (hooks) {
         {
           id: '1',
           name: 'Foo',
-        }, {
+        },
+        {
           id: '2',
           name: 'Bar',
         },

@@ -70,6 +70,25 @@ Record for the type and ID
 
 Type: Object | Promise | undefined
 
+#### query
+
+Queries records for a type.
+
+Unlike `getAll()`, this will never return cached data.
+
+##### Params:
+
+| Name          | Type     | Attributes | Description                                             |
+| ------------- | -------- | ---------- | ------------------------------------------------------- |
+| type          | string   |            |                                                         |
+| fetchCallback | callback |            | Must return a promise that resolves to the fetched data |
+
+##### Returns:
+
+Queried records
+
+Type: Promise
+
 #### setRecord
 
 Sets (overwrites) the records for a type
