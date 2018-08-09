@@ -2,10 +2,11 @@
 
 ## Table of Contents
 
-- [Service.Store](#service.store)
+- [Service.Store](#servicestore)
   - [Functions](#functions)
     - [getAll](#getall)
     - [getRecord](#getrecord)
+    - [query](#query)
     - [setRecord](#setrecord)
     - [addRecord](#addrecord)
     - [updateRecord](#updaterecord)
