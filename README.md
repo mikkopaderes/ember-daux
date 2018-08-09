@@ -8,7 +8,7 @@ A state management solution for your Ember apps that combines some of the concep
 Design
 ------------------------------------------------------------------------------
 
-The idea is to have an immutable model-based state in which your Route's can subscribe to for changes. When a state changes, all subscribed Route's will call their [`refresh()`](https://emberjs.com/api/ember/3.3/classes/Route/methods/refresh?anchor=refresh) function. Because states are immutable, the Route will pass-in a new `model` to its Controller effectively rerendering the view.
+The idea is to have an immutable model-based state in which your Routes can subscribe to for changes. When a state changes, all subscribed Routes will call their [`refresh()`](https://emberjs.com/api/ember/3.3/classes/Route/methods/refresh?anchor=refresh) function. Because states are immutable, the Route will pass-in a new `model` to its Controller effectively rerendering the view.
 
 With immutable states, your Component's lifecycle hooks will now always fire when you update the value of an object or array. You also don't need to listen for deep properties in your computed properties.
 
