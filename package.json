@@ -1,13 +1,13 @@
 {
-  "name": "ember-route-state",
+  "name": "ember-daux",
   "version": "0.0.0",
-  "description": "The default blueprint for ember-cli addons.",
+  "description": "State management for your Ember apps",
   "keywords": [
     "ember-addon"
   ],
-  "repository": "",
+  "repository": "https://github.com/rmmmp/ember-daux",
   "license": "MIT",
-  "author": "",
+  "author": "Mikko Paderes",
   "directories": {
     "doc": "doc",
     "test": "tests"
@@ -37,13 +37,18 @@
     "ember-cli-uglify": "^2.0.0",
     "ember-disable-prototype-extensions": "^1.1.2",
     "ember-export-application-global": "^2.0.0",
+    "ember-inflector": "^3.0.0",
     "ember-load-initializers": "^1.1.0",
     "ember-maybe-import-regenerator": "^0.1.6",
     "ember-resolver": "^4.0.0",
+    "ember-sinon": "^2.2.0",
     "ember-source": "~3.3.0",
     "ember-source-channel-url": "^1.0.1",
     "ember-try": "^0.2.23",
+    "eslint-config-airbnb-base": "^13.0.0",
+    "eslint-config-rmmmp": "^0.3.0",
     "eslint-plugin-ember": "^5.0.0",
+    "eslint-plugin-import": "^2.12.0",
     "eslint-plugin-node": "^6.0.1",
     "loader.js": "^4.2.3",
     "qunit-dom": "^0.6.2"

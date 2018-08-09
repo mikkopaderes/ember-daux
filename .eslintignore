@@ -14,3 +14,15 @@
 
 # ember-try
 /.node_modules.ember-try/
+
+# ember generated files
+index.js
+testem.js
+config/*.js
+tests/*.js
+tests/dummy/*.js
+tests/dummy/app/*.js
+tests/dummy/config/*.js
+tests/helpers/destroy-app.js
+tests/helpers/module-for-acceptance.js
+tests/helpers/start-app.js

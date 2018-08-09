@@ -9,7 +9,10 @@ module.exports = {
   ],
   extends: [
     'eslint:recommended',
-    'plugin:ember/recommended'
+    'plugin:ember/recommended',
+    'airbnb-base',
+    'rmmmp/base',
+    'rmmmp/ember'
   ],
   env: {
     browser: true
