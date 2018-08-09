@@ -10,14 +10,14 @@ Design
 
 The idea is to have an immutable model-based state in which your Routes can subscribe to for changes. When a state changes, all subscribed Routes will call their [`refresh()`](https://emberjs.com/api/ember/3.3/classes/Route/methods/refresh?anchor=refresh) function. Because states are immutable, the Route will pass-in a new `model` to its Controller effectively rerendering the view.
 
-With immutable states, your Component's lifecycle hooks will now always fire when you update the value of an object or array. You also don't need to listen for deep properties in your computed properties.
+With immutable states, your Component's lifecycle hooks will now always fire when you update the value of an object or array. You'll also no longer need to listen for deep properties in your computed properties.
 
 e.g.
 
 - `Ember.computed('todos.@each.isDone')` -> `Ember.computed('todos')`
 - `Ember.computed('todos.[]')` -> `Ember.computed('todos')`
 
-What's the difference performance wise? I don't think there's much at the current state of Ember. I'd say it's an ergonomics issue right now.
+What's the difference for the computed properties performance wise? I don't think there's much at the current state of Ember. I'd say it's an ergonomics issue right now.
 
 Installation
 ------------------------------------------------------------------------------
@@ -29,7 +29,7 @@ ember install ember-daux
 Usage
 ------------------------------------------------------------------------------
 
-*Check out the [API reference](API.md)*
+Check out the [API reference](API.md)
 
 ### Fetching states
 
