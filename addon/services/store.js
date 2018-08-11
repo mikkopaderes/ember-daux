@@ -22,41 +22,36 @@ export default Service.extend({
   subscriptions: [],
 
   /**
-   * @callback fetchCallback
+   * @callback fetch
    * @return {Promise} Resolves with the records
    */
 
   /**
    * @param {string} type
-   * @param {fetchCallback} [fetchCallback]
+   * @param {fetch} [fetch]
    * @return {(Array.<Object>|Promise)} All records for a type
    * @function
    */
-  getAll(type, fetchCallback) {
+  getAll(type, fetch) {
     this.initializeType(type);
 
     const parsedType = this.parseType(type);
 
-    if (fetchCallback && !this.state[parsedType].isDataComplete) {
-      return fetchCallback().then((records) => {
-        this.setRecordWithoutTriggeringSubscriptions(type, records);
-        this.set(`state.${parsedType}.isDataComplete`, true);
-
-        return this.denormalizeData(this.state[parsedType].data);
-      });
+    if (fetch && !this.state[parsedType].isDataComplete) {
+      return this.getAllUsingFetch(parsedType, fetch);
     }
 
-    return this.denormalizeData(this.state[parsedType].data);
+    return this.getAllUsingCache(parsedType);
   },
 
   /**
    * @param {string} type
    * @param {string} id
-   * @param {fetchCallback} [fetchCallback]
+   * @param {fetch} [fetch]
    * @return {(Object|Promise|undefined)} Record for a type and ID
    * @function
    */
-  getRecord(type, id, fetchCallback) {
+  getRecord(type, id, fetch) {
     this.initializeType(type);
 
     const cachedRecord = this.getCachedRecord(type, id);
@@ -65,12 +60,8 @@ export default Service.extend({
       return cachedRecord;
     }
 
-    if (fetchCallback) {
-      return fetchCallback().then((record) => {
-        this.addRecordWithoutTriggeringSubscriptions(type, record);
-
-        return this.getCachedRecord(type, id);
-      });
+    if (fetch) {
+      return this.getRecordUsingFetch(type, id, fetch);
     }
 
     return undefined;
@@ -78,14 +69,14 @@ export default Service.extend({
 
   /**
    * @param {string} type
-   * @param {fetchCallback} fetchCallback
+   * @param {fetch} fetch
    * @return {Promise} Resolves to queried records
    * @function
    */
-  query(type, fetchCallback) {
+  query(type, fetch) {
     this.initializeType(type);
 
-    return fetchCallback().then((records) => {
+    return fetch().then((records) => {
       records.forEach(record => this.addRecordWithoutTriggeringSubscriptions(type, record));
 
       return records;
@@ -303,5 +294,47 @@ export default Service.extend({
    */
   denormalizeData(data = {}) {
     return Object.keys(data).map(key => Object.assign({}, data[key]));
+  },
+
+  /**
+   * @param {string} type
+   * @param {fetch} fetch
+   * @return {Promise} All records for a type
+   * @private
+   * @function
+   */
+  getAllUsingFetch(type, fetch) {
+    return fetch().then((records) => {
+      this.setRecordWithoutTriggeringSubscriptions(type, records);
+      this.set(`state.${type}.isDataComplete`, true);
+
+      return this.denormalizeData(this.state[type].data);
+    });
+  },
+
+  /**
+   * @param {string} type
+   * @return {Array.<Object>} All records for a type
+   * @private
+   * @function
+   */
+  getAllUsingCache(type) {
+    return this.denormalizeData(this.state[type].data);
+  },
+
+  /**
+   * @param {string} type
+   * @param {string} id
+   * @param {fetch} fetch
+   * @return {Promise} Record for type and ID
+   * @private
+   * @function
+   */
+  getRecordUsingFetch(type, id, fetch) {
+    return fetch().then((record) => {
+      this.addRecordWithoutTriggeringSubscriptions(type, record);
+
+      return this.getCachedRecord(type, id);
+    });
   },
 });
