@@ -230,7 +230,9 @@ export default Service.extend({
     if (this.isStateForTypeExisting(type)) {
       const { data } = this.state[this.parseType(type)];
 
-      return data[id];
+      if (data[id]) {
+        return Object.assign({}, data[id]);
+      }
     }
 
     return undefined;
@@ -300,6 +302,6 @@ export default Service.extend({
    * @function
    */
   denormalizeData(data = {}) {
-    return Object.keys(data).map(key => data[key]);
+    return Object.keys(data).map(key => Object.assign({}, data[key]));
   },
 });
