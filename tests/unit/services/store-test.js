@@ -13,11 +13,11 @@ module('Unit | Service | store', function (hooks) {
       // Arrange
       const records = [
         {
-          id: '1',
+          id: 'user_a',
           name: 'Foo',
         },
         {
-          id: '2',
+          id: 'user_b',
           name: 'Bar',
         },
       ];
@@ -38,11 +38,11 @@ module('Unit | Service | store', function (hooks) {
       // Arrange
       const records = [
         {
-          id: '1',
+          id: 'user_a',
           name: 'Foo',
         },
         {
-          id: '2',
+          id: 'user_b',
           name: 'Bar',
         },
       ];
@@ -61,11 +61,11 @@ module('Unit | Service | store', function (hooks) {
       // Arrange
       const records = [
         {
-          id: '1',
+          id: 'user_a',
           name: 'Foo',
         },
         {
-          id: '2',
+          id: 'user_b',
           name: 'Bar',
         },
       ];
@@ -101,11 +101,11 @@ module('Unit | Service | store', function (hooks) {
       // Arrange
       const records = [
         {
-          id: '1',
+          id: 'user_a',
           name: 'Foo',
         },
         {
-          id: '2',
+          id: 'user_b',
           name: 'Bar',
         },
       ];
@@ -114,7 +114,7 @@ module('Unit | Service | store', function (hooks) {
       service.setRecord('user', records);
 
       // Act
-      const result = service.getRecord('user', '1');
+      const result = service.getRecord('user', 'user_a');
 
       // Assert
       assert.deepEqual(result, records[0]);
@@ -124,11 +124,11 @@ module('Unit | Service | store', function (hooks) {
       assert.expect(1);
 
       // Arrange
-      const record = { id: '1', name: 'Foo' };
+      const record = { id: 'user_a', name: 'Foo' };
       const service = this.owner.lookup('service:store');
 
       // Act
-      const result = await service.getRecord('user', '1', () => Promise.resolve(record));
+      const result = await service.getRecord('user', 'user_a', () => Promise.resolve(record));
 
       // Assert
       assert.deepEqual(result, record);
@@ -138,13 +138,13 @@ module('Unit | Service | store', function (hooks) {
       assert.expect(1);
 
       // Arrange
-      const record = { id: '1', name: 'Foo' };
+      const record = { id: 'user_a', name: 'Foo' };
       const service = this.owner.lookup('service:store');
 
-      await service.getRecord('user', '1', () => Promise.resolve(record));
+      await service.getRecord('user', 'user_a', () => Promise.resolve(record));
 
       // Act
-      const result = service.getRecord('user', '1', () => Promise.resolve(record));
+      const result = service.getRecord('user', 'user_a', () => Promise.resolve(record));
 
       // Assert
       assert.deepEqual(result, record);
@@ -157,7 +157,7 @@ module('Unit | Service | store', function (hooks) {
       const service = this.owner.lookup('service:store');
 
       // Act
-      const result = service.getRecord('user', '1');
+      const result = service.getRecord('user', 'user_a');
 
       // Assert
       assert.equal(result, undefined);
@@ -171,11 +171,11 @@ module('Unit | Service | store', function (hooks) {
       // Arrange
       const records = [
         {
-          id: '1',
+          id: 'user_a',
           name: 'Foo',
         },
         {
-          id: '2',
+          id: 'user_b',
           name: 'Bar',
         },
       ];
@@ -194,11 +194,11 @@ module('Unit | Service | store', function (hooks) {
       // Arrange
       const records = [
         {
-          id: '1',
+          id: 'user_a',
           name: 'Foo',
         },
         {
-          id: '2',
+          id: 'user_b',
           name: 'Bar',
         },
       ];
@@ -221,11 +221,11 @@ module('Unit | Service | store', function (hooks) {
       // Arrange
       const records = [
         {
-          id: '1',
+          id: 'user_a',
           name: 'Foo',
         },
         {
-          id: '2',
+          id: 'user_b',
           name: 'Bar',
         },
       ];
@@ -244,11 +244,11 @@ module('Unit | Service | store', function (hooks) {
       // Arrange
       const records = [
         {
-          id: '1',
+          id: 'user_a',
           name: 'Foo',
         },
         {
-          id: '2',
+          id: 'user_b',
           name: 'Bar',
         },
       ];
@@ -276,7 +276,7 @@ module('Unit | Service | store', function (hooks) {
       assert.expect(2);
 
       // Arrange
-      const recordToAdd = { id: '100', name: 'Foobar' };
+      const recordToAdd = { id: 'user_100', name: 'Foobar' };
       const service = this.owner.lookup('service:store');
 
       // Act
@@ -284,14 +284,14 @@ module('Unit | Service | store', function (hooks) {
 
       // Assert
       assert.equal(service.getAll('users').length, 1);
-      assert.deepEqual(service.getRecord('user', '100'), recordToAdd);
+      assert.deepEqual(service.getRecord('user', 'user_100'), recordToAdd);
     });
 
     test('should trigger subscriptions when adding the record for a type', function (assert) {
       assert.expect(1);
 
       // Arrange
-      const recordToAdd = { id: '100', name: 'Foobar' };
+      const recordToAdd = { id: 'user_100', name: 'Foobar' };
       const route = {
         routeName: 'foo',
 
@@ -320,21 +320,21 @@ module('Unit | Service | store', function (hooks) {
 
       service.setRecord('user', [
         {
-          id: '1',
+          id: 'user_a',
           name: 'Foo',
         },
         {
-          id: '2',
+          id: 'user_b',
           name: 'Bar',
         },
       ]);
 
       // Act
-      service.updateRecord('user', '1', { name: 'Test' });
+      service.updateRecord('user', 'user_a', { name: 'Test' });
 
       // Assert
-      assert.deepEqual(service.getRecord('user', '1'), {
-        id: '1',
+      assert.deepEqual(service.getRecord('user', 'user_a'), {
+        id: 'user_a',
         name: 'Test',
       });
     });
@@ -354,18 +354,18 @@ module('Unit | Service | store', function (hooks) {
 
       service.setRecord('user', [
         {
-          id: '1',
+          id: 'user_a',
           name: 'Foo',
         },
         {
-          id: '2',
+          id: 'user_b',
           name: 'Bar',
         },
       ]);
       service.subscribe(route);
 
       // Act
-      service.updateRecord('user', '1', { name: 'Test' });
+      service.updateRecord('user', 'user_a', { name: 'Test' });
 
       // Assert
       assert.ok(refreshSpy.calledOnce);
@@ -379,7 +379,7 @@ module('Unit | Service | store', function (hooks) {
 
       try {
         // Act
-        service.updateRecord('user', '1', { name: 'Test' });
+        service.updateRecord('user', 'user_a', { name: 'Test' });
       } catch (error) {
         // Assert
         assert.equal(error.message, 'Record doesn\'t exist');
@@ -396,21 +396,21 @@ module('Unit | Service | store', function (hooks) {
 
       service.setRecord('user', [
         {
-          id: '1',
+          id: 'user_a',
           name: 'Foo',
         },
         {
-          id: '2',
+          id: 'user_b',
           name: 'Bar',
         },
       ]);
 
       // Act
-      service.deleteRecord('user', '1');
+      service.deleteRecord('user', 'user_a');
 
       // Assert
       assert.equal(service.getAll('user').length, 1);
-      assert.equal(service.getRecord('user', '1'), undefined);
+      assert.equal(service.getRecord('user', 'user_a'), undefined);
     });
 
     test('should trigger subscriptions when deleting the record for a type', function (assert) {
@@ -428,18 +428,18 @@ module('Unit | Service | store', function (hooks) {
 
       service.setRecord('user', [
         {
-          id: '1',
+          id: 'user_a',
           name: 'Foo',
         },
         {
-          id: '2',
+          id: 'user_b',
           name: 'Bar',
         },
       ]);
       service.subscribe(route);
 
       // Act
-      service.deleteRecord('user', '1');
+      service.deleteRecord('user', 'user_a');
 
       // Assert
       assert.ok(refreshSpy.calledOnce);
@@ -453,7 +453,7 @@ module('Unit | Service | store', function (hooks) {
 
       try {
         // Act
-        service.deleteRecord('user', '1');
+        service.deleteRecord('user', 'user_a');
       } catch (error) {
         // Assert
         assert.equal(error.message, 'Record doesn\'t exist');

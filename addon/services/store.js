@@ -29,7 +29,7 @@ export default Service.extend({
   /**
    * @param {string} type
    * @param {fetchCallback} [fetchCallback]
-   * @return {(Array.<Object>|Promise)} All records for the type
+   * @return {(Array.<Object>|Promise)} All records for a type
    * @function
    */
   getAll(type, fetchCallback) {
@@ -37,23 +37,23 @@ export default Service.extend({
 
     const parsedType = this.parseType(type);
 
-    if (fetchCallback && !this.state[parsedType].isRecordsComplete) {
+    if (fetchCallback && !this.state[parsedType].isDataComplete) {
       return fetchCallback().then((records) => {
         this.setRecordWithoutTriggeringSubscriptions(type, records);
-        this.set(`state.${parsedType}.isRecordsComplete`, true);
+        this.set(`state.${parsedType}.isDataComplete`, true);
 
-        return this.state[parsedType].records;
+        return this.denormalizeData(this.state[parsedType].data);
       });
     }
 
-    return this.state[parsedType].records;
+    return this.denormalizeData(this.state[parsedType].data);
   },
 
   /**
    * @param {string} type
    * @param {string} id
    * @param {fetchCallback} [fetchCallback]
-   * @return {(Object|Promise|undefined)} Record for the type and ID
+   * @return {(Object|Promise|undefined)} Record for a type and ID
    * @function
    */
   getRecord(type, id, fetchCallback) {
@@ -123,16 +123,9 @@ export default Service.extend({
 
     if (recordToUpdate) {
       const parsedType = this.parseType(type);
-      const { records } = this.state[parsedType];
       const updatedRecord = Object.assign({}, recordToUpdate, attributes);
-      const updatedRecords = records.map((record) => {
-        if (record.id === id) {
-          return updatedRecord;
-        }
-
-        return record;
-      });
-      const stateForType = Object.assign({}, this.state[parsedType], { records: updatedRecords });
+      const updatedData = Object.assign({}, this.state[parsedType].data, { [id]: updatedRecord });
+      const stateForType = Object.assign({}, this.state[parsedType], { data: updatedData });
 
       this.set('state', Object.assign({}, this.state, { [parsedType]: stateForType }));
       this.triggerSubscriptions();
@@ -149,9 +142,11 @@ export default Service.extend({
   deleteRecord(type, id) {
     if (this.getCachedRecord(type, id)) {
       const parsedType = this.parseType(type);
-      const { records } = this.state[parsedType];
-      const updatedRecords = records.filter(record => record.id !== id);
-      const stateForType = Object.assign({}, this.state[parsedType], { records: updatedRecords });
+      const data = Object.assign({}, this.state[parsedType].data);
+
+      delete data[id];
+
+      const stateForType = Object.assign({}, this.state[parsedType], { data });
 
       this.set('state', Object.assign({}, this.state, { [parsedType]: stateForType }));
       this.triggerSubscriptions();
@@ -217,8 +212,8 @@ export default Service.extend({
     if (!this.isStateForTypeExisting(type)) {
       this.set('state', Object.assign({}, this.state, {
         [this.parseType(type)]: {
-          isRecordsComplete: false,
-          records: [],
+          isDataComplete: false,
+          data: {},
         },
       }));
     }
@@ -233,9 +228,9 @@ export default Service.extend({
    */
   getCachedRecord(type, id) {
     if (this.isStateForTypeExisting(type)) {
-      const { records } = this.state[this.parseType(type)];
+      const { data } = this.state[this.parseType(type)];
 
-      return records.find(record => record.id === id);
+      return data[id];
     }
 
     return undefined;
@@ -256,8 +251,9 @@ export default Service.extend({
    * @function
    */
   setRecordWithoutTriggeringSubscriptions(type, records) {
+    const normalizedData = this.normalizeData(records);
     const newState = Object.assign({}, this.state, {
-      [this.parseType(type)]: { records },
+      [this.parseType(type)]: { data: normalizedData },
     });
 
     this.set('state', newState);
@@ -274,10 +270,36 @@ export default Service.extend({
 
     const parsedType = this.parseType(type);
     const stateForType = Object.assign({}, this.state[parsedType], {
-      records: [...this.state[parsedType].records, record],
+      data: Object.assign({}, this.state[parsedType].data, { [record.id]: record }),
     });
     const newState = Object.assign({}, this.state, { [parsedType]: stateForType });
 
     this.set('state', newState);
+  },
+
+  /**
+   * @param {Array.<Object>} records
+   * @return {Object} Normalized data
+   * @private
+   * @function
+   */
+  normalizeData(records) {
+    const normalizeData = {};
+
+    records.forEach((record) => {
+      normalizeData[record.id] = record;
+    });
+
+    return normalizeData;
+  },
+
+  /**
+   * @param {Object} [data={}]
+   * @return {Array.<Object>} Denormalized data
+   * @private
+   * @function
+   */
+  denormalizeData(data = {}) {
+    return Object.keys(data).map(key => data[key]);
   },
 });
