@@ -31,6 +31,26 @@ Usage
 
 Check out the [API reference](API.md)
 
+### Setup your models
+
+Create your model at **app/models/<model-name>.js**
+
+```javascript
+// app/models/user.js
+import Model from 'ember-daux/utils/model';
+
+export default Model.extend({
+  attributes: ['name'],
+  relationship: {
+    posts: {
+      type: 'post',
+      kind: 'hasMany',
+      inverse: 'author'
+    }
+  }
+});
+```
+
 ### Fetching states
 
 ```javascript
@@ -50,7 +70,7 @@ export default Route.extend({
         return response.json();
       });
     });
-  },
+  }
 });
 ```
 
