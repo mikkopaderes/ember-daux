@@ -9,10 +9,8 @@ export default Route.extend({
   },
 
   model(params) {
-    return this.store.getRecord('user', params.username, () => (
-      fetch(`https://api.github.com/users/${params.username}`).then(response => (
-        response.json()
-      )).then(data => Object.assign({}, data, { id: data.login }))
-    ));
+    const user = { id: params.username, name: 'Foobar' };
+
+    return this.store.getRecord('user', params.username, () => Promise.resolve(user));
   },
 });

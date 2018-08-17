@@ -4,6 +4,7 @@
 
 - [Service.Store](#servicestore)
   - [Functions](#functions)
+    - [subscribe](#subscribe)
     - [getAll](#getall)
     - [getRecord](#getrecord)
     - [query](#query)
@@ -32,16 +33,16 @@ Whenever the state changes, all subscribed Routes will call their `refresh()` fu
 
 Gets all the records for a type.
 
-When `fetchCallback` is unavailable, this will return the cached records in the store. Otherwise, this returns a promise that resolves to whatever gets resolved in `fetchCallback`.
+When `fetch` is unavailable, this will return the cached records in the store. Otherwise, this returns a promise that resolves to whatever gets resolved in `fetch`.
 
-`fetchCallback` will be skipped even when passed-in if all records are in the cache already.
+`fetch` will be skipped even when passed-in if all records are in the cache already.
 
 ##### Params:
 
-| Name          | Type     | Attributes | Description                                             |
-| ------------- | -------- | ---------- | ------------------------------------------------------- |
-| type          | string   |            |                                                         |
-| fetchCallback | callback | optional   | Must return a promise that resolves to the fetched data |
+| Name   | Type     | Attributes | Description                                             |
+| -----  | -------- | ---------- | ------------------------------------------------------- |
+| type   | string   |            |                                                         |
+| fetch  | callback | optional   | Must return a promise that resolves to the fetched data |
 
 ##### Returns:
 
@@ -53,17 +54,17 @@ Type: Array | Promise
 
 Gets the record for a type and ID.
 
-When `fetchCallback` is unavailable, this will return the cached record in the store. Otherwise, this returns a promise that resolves to whatever gets resolved in `fetchCallback`.
+When `fetch` is unavailable, this will return the cached record in the store. Otherwise, this returns a promise that resolves to whatever gets resolved in `fetch`.
 
-`fetchCallback` will be skipped even when passed-in if the record is in the cache already.
+`fetch` will be skipped even when passed-in if the record is in the cache already.
 
 ##### Params:
 
-| Name          | Type     | Attributes | Description                                             |
-| ------------- | -------- | ---------- | --------------------------------------------------------|
-| type          | string   |            |                                                         |
-| id            | string   |            |                                                         |
-| fetchCallback | callback | optional   | Must return a promise that resolves to the fetched data |
+| Name   | Type     | Attributes | Description                                             |
+| ------ | -------- | ---------- | --------------------------------------------------------|
+| type   | string   |            |                                                         |
+| id     | string   |            |                                                         |
+| fetch  | callback | optional   | Must return a promise that resolves to the fetched data |
 
 ##### Returns:
 
@@ -79,10 +80,10 @@ Unlike `getAll()`, this will never return cached data.
 
 ##### Params:
 
-| Name          | Type     | Attributes | Description                                             |
-| ------------- | -------- | ---------- | ------------------------------------------------------- |
-| type          | string   |            |                                                         |
-| fetchCallback | callback |            | Must return a promise that resolves to the fetched data |
+| Name  | Type     | Attributes | Description                                             |
+| ------| -------- | ---------- | ------------------------------------------------------- |
+| type  | string   |            |                                                         |
+| fetch | callback |            | Must return a promise that resolves to the fetched data |
 
 ##### Returns:
 
@@ -92,7 +93,11 @@ Type: Promise
 
 #### setRecord
 
-Sets (overwrites) the records for a type
+Sets (overwrites completely) the records for a type.
+
+This accepts the following option:
+
+- `isBackgroundOperation` - When true, this won't execute the listeners for the subscribed Routes.
 
 ##### Params:
 
@@ -100,21 +105,31 @@ Sets (overwrites) the records for a type
 | --------| -------------- | ---------- | ------------|
 | type    | string         |            |             |
 | records | Array.<Object> |            |             |
+| option  | Object         | optional   |             |
 
 #### addRecord
 
-Adds a record for a type
+Adds a record for a type.
+
+This accepts the following option:
+
+- `isBackgroundOperation` - When true, this won't execute the listeners for the subscribed Routes.
 
 ##### Params:
 
-| Name   | Type   | Attributes | Description |
-| -------| -------| ---------- | ------------|
-| type   | string |            |             |
-| record | Object |            |             |
+| Name   | Type    | Attributes | Description |
+| -------| ------- | ---------- | ------------|
+| type   | string  |            |             |
+| record | Object  |            |             |
+| option | Object  | optional   |             |
 
 #### updateRecord
 
-Updates a record for a type
+Updates a record for a type.
+
+This accepts the following option:
+
+- `isBackgroundOperation` - When true, this won't execute the listeners for the subscribed Routes.
 
 ##### Params:
 
@@ -123,10 +138,15 @@ Updates a record for a type
 | type   | string |            |             |
 | id     | string |            |             |
 | record | Object |            |             |
+| option | Object | optional   |             |
 
 #### deleteRecord
 
-Deletes a record for a type
+Deletes a record for a type.
+
+This accepts the following option:
+
+- `isBackgroundOperation` - When true, this won't execute the listeners for the subscribed Routes.
 
 ##### Params:
 
@@ -134,3 +154,36 @@ Deletes a record for a type
 | -------| -------| ---------- | ------------|
 | type   | string |            |             |
 | id     | string |            |             |
+| option | Object | optional   |             |
+
+#### batch
+
+Returns a `Batch` class used for batching operations.
+
+This is for the case where you want to update the state multiple times sequentially while just triggering the listeners for the subscribed Routes **once**.
+
+This exposes the following functions:
+
+- `batch.setRecord(type, records)`
+- `batch.addRecord(type, record)`
+- `batch.updateRecord(type, id, attribute)`
+- `batch.deleteRecord(type, id)`
+- `batch.commit(option)`
+  - Accepts the following option:
+    - `isBackgroundOperation` - When true, this won't execute the listeners for the subscribed Routes.
+
+e.g.
+
+```javascript
+const batch = store.batch();
+
+batch.updateRecord('user', 'user_a', { name: 'Foo' });
+batch.deleteRecord('user', 'user_b');
+batch.commit();
+```
+
+##### Returns:
+
+Instance of the `Batch`
+
+Type: `Utility.Batch`
