@@ -1,7 +1,7 @@
 import { getOwner } from '@ember/application';
 
 /**
- * @param {EmberObject} model
+ * @param {Utility.Model} model
  * @return {Object} Record with default values
  * @function
  */
@@ -77,18 +77,19 @@ function normalizeHasMany(type, key, records) {
  */
 export default function normalize(type, record, store) {
   const model = getOwner(store).lookup(`model:${type}`);
+  const preNormalizedRecord = model.normalize(record);
   const normalizedRecord = Object.assign(getDefaultRecord(model), { id: record.id });
 
-  Object.keys(record).forEach((key) => {
+  Object.keys(preNormalizedRecord).forEach((key) => {
     if (model.attributes.includes(key)) {
-      normalizedRecord[key] = record[key];
+      normalizedRecord[key] = preNormalizedRecord[key];
     } else if (Object.keys(model.relationship).includes(key)) {
       const { kind } = model.relationship[key];
 
       if (kind === 'belongsTo') {
-        normalizedRecord[key] = normalizeBelongsTo(type, key, record[key]);
+        normalizedRecord[key] = normalizeBelongsTo(type, key, preNormalizedRecord[key]);
       } else if (kind === 'hasMany') {
-        normalizedRecord[key] = normalizeHasMany(type, key, record[key]);
+        normalizedRecord[key] = normalizeHasMany(type, key, preNormalizedRecord[key]);
       }
     }
   });
