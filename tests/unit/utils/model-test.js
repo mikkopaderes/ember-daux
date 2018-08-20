@@ -3,9 +3,16 @@ import { module, test } from 'qunit';
 import Model from 'ember-daux/utils/model';
 
 module('Unit | Utility | model', function () {
-  test('nothing to test', function (assert) {
+  test('should return the record by default when normalizing', function (assert) {
     assert.expect(1);
 
-    assert.ok(Model.create());
+    // Arrange
+    const model = Model.create();
+
+    // Act
+    const result = model.normalize({ id: 'foo' });
+
+    // Assert
+    assert.deepEqual(result, { id: 'foo' });
   });
 });

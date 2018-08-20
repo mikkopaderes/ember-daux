@@ -110,5 +110,25 @@ module('Unit | Utility | normalize', function (hooks) {
         assert.equal(error.message, 'user.groups is an invalid hasMany relationship');
       }
     });
+
+    test('should pre-normalize using custom normalize', function (assert) {
+      assert.expect(1);
+
+      // Arrange
+      const record = { id: 'user_a', name: '123Foowee', fooPosts: ['foobar'] };
+      const store = this.owner.lookup('service:store');
+
+      // Act
+      const result = normalize('user', record, store);
+
+      // Assert
+      assert.deepEqual(result, {
+        id: 'user_a',
+        name: 'Foobar',
+        country: null,
+        groups: [],
+        posts: ['foobar'],
+      });
+    });
   });
 });
