@@ -37,6 +37,7 @@ Create your model at **app/models/[model-name].js**
 
 ```javascript
 // app/models/user.js
+import { camelize } from '@ember/string';
 import Model from 'ember-daux/utils/model';
 
 export default Model.extend({
@@ -47,6 +48,21 @@ export default Model.extend({
       kind: 'hasMany',
       inverse: 'author'
     }
+  },
+
+  /**
+   * Optional hook to normalize a record
+   */
+  normalize(record) {
+    const normalizedRecord = {};
+
+    Object.keys(record).forEach((key) => {
+      const camelizedKey = camelize(key);
+
+      normalizedRecord[camelizedKey] = record[key];
+    });
+
+    return normalizedRecord;
   }
 });
 ```
