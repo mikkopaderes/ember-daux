@@ -19,7 +19,7 @@ e.g.
 
 What's the difference for the computed properties performance wise? I don't think there's much at the current state of Ember. I'd say it's an ergonomics issue right now.
 
-It's also worth noting that Ember's future with [Glimmer](https://glimmerjs.com) improves performance drastically through immutability and its [tracking pattern](https://glimmerjs.com/guides/tracked-properties). Daux should work well with it.
+However, it's also worth noting that Ember's future with [Glimmer](https://glimmerjs.com) improves performance drastically through immutability and its [tracking pattern](https://glimmerjs.com/guides/tracked-properties). Daux should work well with it.
 
 Installation
 ------------------------------------------------------------------------------
