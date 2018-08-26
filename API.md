@@ -2,32 +2,36 @@
 
 ## Table of Contents
 
-- [Service.Store](#servicestore)
+- [Daux.Core.Store](#dauxcorestore)
   - [Functions](#functions)
     - [subscribe](#subscribe)
     - [getAll](#getall)
-    - [getRecord](#getrecord)
+    - [get](#get)
     - [query](#query)
-    - [setRecord](#setrecord)
-    - [addRecord](#addrecord)
-    - [updateRecord](#updaterecord)
-    - [deleteRecord](#deleterecord)
+    - [set](#set)
+    - [add](#add)
+    - [update](#update)
+    - [delete](#delete)
 
-## Service.Store
+## Daux.Core.Store
 
 ### Functions
 
 #### subscribe
 
-Subscribes a Route for any changes in the state.
-
-Whenever the state changes, all subscribed Routes will call their `refresh()` function.
+Subscribes for any changes in the state.
 
 ##### Params:
 
-| Name  | Type        | Attributes | Description |
-| ----- | ----------- | ---------- | ------------|
-| route | Ember.Route |            |             |
+| Name     | Type        | Attributes | Description |
+| -------- | ----------- | ---------- | ------------|
+| callback | callback    |            |             |
+
+##### Returns:
+
+Function that you can call to unsubscribe from changes.
+
+Type: Function
 
 #### getAll
 
@@ -50,7 +54,7 @@ All the records for a type
 
 Type: Array | Promise
 
-#### getRecord
+#### get
 
 Gets the record for a type and ID.
 
@@ -91,7 +95,7 @@ Queried records
 
 Type: Promise
 
-#### setRecord
+#### set
 
 Sets (overwrites completely) the records for a type.
 
@@ -107,7 +111,7 @@ This accepts the following option:
 | records | Array.<Object> |            |             |
 | option  | Object         | optional   |             |
 
-#### addRecord
+#### add
 
 Adds a record for a type.
 
@@ -123,7 +127,7 @@ This accepts the following option:
 | record | Object  |            |             |
 | option | Object  | optional   |             |
 
-#### updateRecord
+#### update
 
 Updates a record for a type.
 
@@ -140,7 +144,7 @@ This accepts the following option:
 | record | Object |            |             |
 | option | Object | optional   |             |
 
-#### deleteRecord
+#### delete
 
 Deletes a record for a type.
 
@@ -164,10 +168,10 @@ This is for the case where you want to update the state multiple times sequentia
 
 This exposes the following functions:
 
-- `batch.setRecord(type, records)`
-- `batch.addRecord(type, record)`
-- `batch.updateRecord(type, id, attribute)`
-- `batch.deleteRecord(type, id)`
+- `batch.set(type, records)`
+- `batch.add(type, record)`
+- `batch.update(type, id, attribute)`
+- `batch.delete(type, id)`
 - `batch.commit(option)`
   - Accepts the following option:
     - `isBackgroundOperation` - When true, this won't execute the listeners for the subscribed Routes.
@@ -177,8 +181,8 @@ e.g.
 ```javascript
 const batch = store.batch();
 
-batch.updateRecord('user', 'user_a', { name: 'Foo' });
-batch.deleteRecord('user', 'user_b');
+batch.update('user', 'user_a', { name: 'Foo' });
+batch.delete('user', 'user_b');
 batch.commit();
 ```
 
@@ -186,4 +190,4 @@ batch.commit();
 
 Instance of the `Batch`
 
-Type: `Utility.Batch`
+Type: `Daux.Core.Batch`

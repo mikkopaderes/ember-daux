@@ -14,6 +14,6 @@ export default Controller.extend({
 
     const repoIdToUpdate = this.model[0].id;
 
-    this.store.updateRecord('repo', repoIdToUpdate, { name: this.newRepoName });
+    this.store.update('repo', repoIdToUpdate, { name: this.newRepoName });
   },
 });

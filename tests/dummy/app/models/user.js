@@ -1,26 +1,31 @@
-import Model from 'ember-daux/utils/model';
+import { Model } from 'ember-daux/daux';
 
-export default Model.extend({
-  attributes: ['name'],
-  relationship: {
-    country: {
-      type: 'country',
-      kind: 'belongsTo',
-      inverse: null,
-    },
-    groups: {
-      type: 'group',
-      kind: 'hasMany',
-      inverse: 'members',
-    },
-    posts: {
-      type: 'post',
-      kind: 'hasMany',
-      inverse: 'author',
-    },
-  },
+export default class User extends Model {
+  static get attributes() {
+    return ['name'];
+  }
 
-  normalize(record) {
+  static get relationship() {
+    return {
+      country: {
+        type: 'country',
+        kind: 'belongsTo',
+        inverse: null,
+      },
+      groups: {
+        type: 'group',
+        kind: 'hasMany',
+        inverse: 'members',
+      },
+      posts: {
+        type: 'post',
+        kind: 'hasMany',
+        inverse: 'author',
+      },
+    };
+  }
+
+  static normalize(record) {
     const normalizedRecord = Object.assign({}, record);
 
     if (record.name.startsWith('123')) {
@@ -34,5 +39,5 @@ export default Model.extend({
     }
 
     return normalizedRecord;
-  },
-});
+  }
+}
