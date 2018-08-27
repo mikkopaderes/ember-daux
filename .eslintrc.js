@@ -48,6 +48,14 @@ module.exports = {
       rules: Object.assign({}, require('eslint-plugin-node').configs.recommended.rules, {
         // add your custom rules and overrides for node files here
       })
+    },
+    {
+      files: [
+        'tests/dummy/app/**'
+      ],
+      rules: {
+        'require-jsdoc': 'off'
+      }
     }
   ]
 };

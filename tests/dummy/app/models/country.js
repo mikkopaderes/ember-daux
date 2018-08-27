@@ -1,5 +1,7 @@
-import Model from 'ember-daux/utils/model';
+import { Model } from 'ember-daux/daux';
 
-export default Model.extend({
-  attributes: ['name'],
-});
+export default class Contry extends Model {
+  static get attributes() {
+    return ['name'];
+  }
+}

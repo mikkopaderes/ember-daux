@@ -1,12 +1,17 @@
-import Model from 'ember-daux/utils/model';
+import { Model } from 'ember-daux/daux';
 
-export default Model.extend({
-  attributes: ['message'],
-  relationship: {
-    author: {
-      type: 'user',
-      kind: 'belongsTo',
-      inverse: 'posts',
-    },
-  },
-});
+export default class Post extends Model {
+  static get attributes() {
+    return ['message'];
+  }
+
+  static get relationship() {
+    return {
+      author: {
+        type: 'user',
+        kind: 'belongsTo',
+        inverse: 'posts',
+      },
+    };
+  }
+}

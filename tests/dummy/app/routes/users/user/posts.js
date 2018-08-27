@@ -5,7 +5,7 @@ export default Route.extend({
   store: service('store'),
 
   beforeModel() {
-    this.store.subscribe(this);
+    this.store.subscribe(() => this.refresh());
   },
 
   model() {
@@ -15,11 +15,11 @@ export default Route.extend({
       const batch = this.store.batch();
       const post = { id: 'post_a', message: 'Hello world' };
 
-      batch.addRecord('post', post);
-      batch.updateRecord('user', user.id, { posts: [post] });
+      batch.add('post', post);
+      batch.update('user', user.id, { posts: [post] });
       batch.commit({ isBackgroundOperation: true });
     }
 
-    return this.store.getRecord('user', user.id).posts;
+    return this.store.get('user', user.id).posts;
   },
 });

@@ -8,7 +8,7 @@ A state management solution for your Ember apps that combines some of the concep
 Design
 ------------------------------------------------------------------------------
 
-The idea is to have an immutable model-based state in which your Routes can subscribe to for changes. When a state changes, all subscribed Routes will call their [`refresh()`](https://emberjs.com/api/ember/3.3/classes/Route/methods/refresh?anchor=refresh) function. Because states are immutable, the Route will pass-in a new `model` to its Controller effectively rerendering the view.
+The idea is to have an immutable model-based state in which you can subscribe to for changes.
 
 With immutable states, your Component's lifecycle hooks will now always fire when you update the value of an object or array. You'll also no longer need to listen for deep properties in your computed properties.
 
@@ -18,6 +18,8 @@ e.g.
 - `Ember.computed('todos.[]')` -> `Ember.computed('todos')`
 
 What's the difference for the computed properties performance wise? I don't think there's much at the current state of Ember. I'd say it's an ergonomics issue right now.
+
+However, it's also worth noting that Ember's future with [Glimmer](https://glimmerjs.com) improves performance drastically through immutability and its [tracking pattern](https://glimmerjs.com/guides/tracked-properties). Daux should work well with it.
 
 Installation
 ------------------------------------------------------------------------------
@@ -33,27 +35,41 @@ Check out the [API reference](API.md)
 
 ### Setup your models
 
-Create your model at **app/models/[model-name].js**
+Create your model at **app/models/[model-name].js**:
 
 ```javascript
 // app/models/user.js
-import { camelize } from '@ember/string';
-import Model from 'ember-daux/utils/model';
+import { Model } from 'ember-daux/daux';
 
-export default Model.extend({
-  attributes: ['name'],
-  relationship: {
-    posts: {
-      type: 'post',
-      kind: 'hasMany',
-      inverse: 'author'
-    }
-  },
+export default class User extends Model {
+  static get attributes() {
+    return ['name'];
+  }
+
+  static get relationship() {
+    return {
+      country: {
+        type: 'country',
+        kind: 'belongsTo',
+        inverse: null,
+      },
+      groups: {
+        type: 'group',
+        kind: 'hasMany',
+        inverse: 'members',
+      },
+      posts: {
+        type: 'post',
+        kind: 'hasMany',
+        inverse: 'author',
+      },
+    };
+  }
 
   /**
    * Optional hook to normalize a record
    */
-  normalize(record) {
+  static normalize(record) {
     const normalizedRecord = {};
 
     Object.keys(record).forEach((key) => {
@@ -63,6 +79,21 @@ export default Model.extend({
     });
 
     return normalizedRecord;
+  }
+}
+```
+
+Next, let's create a model curator that'll contain all the models we have:
+
+```javascript
+// app/models/index.js
+import EmberObject from '@ember/object';
+
+import User from './user';
+
+export default EmberObject.extend({
+  model: {
+    user: User
   }
 });
 ```
@@ -77,7 +108,7 @@ export default Route.extend({
   store: service('store'),
 
   beforeModel() {
-    this.store.subscribe(this);
+    this.store.subscribe(() => this.refresh());
   },
 
   model() {
@@ -105,7 +136,7 @@ export default Controller.extend({
         method: 'POST',
         body: JSON.stringify(newUser)
       }).then(() => {
-        this.store.addRecord('user', newUser);
+        this.store.add('user', newUser);
       });
     }
   }
