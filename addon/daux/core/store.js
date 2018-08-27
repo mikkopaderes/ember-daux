@@ -330,6 +330,44 @@ export default class Store {
   /**
    * @param {string} type
    * @param {Object} record
+   * @param {string} hasManyAttribute
+   * @private
+   * @function
+   */
+  syncExistingHasMany(type, record, hasManyAttribute) {
+    const cardinality = getCardinality(this.model, type, hasManyAttribute);
+    const descriptor = this.model[type].relationship[hasManyAttribute];
+    const inverseData = this.state[descriptor.type].data;
+    const recordId = typeof record === 'object' && record !== null ? record.id : record;
+
+    if (cardinality === 'oneToMany') {
+      const currentHasManyState = this.state[type].data[recordId][hasManyAttribute];
+      const inverseIds = Object.keys(this.state[descriptor.type].data).filter(id => (
+        inverseData[id][descriptor.inverse] === recordId
+      ));
+
+      inverseIds.forEach((id) => {
+        if (!currentHasManyState.includes(id)) {
+          currentHasManyState.push(id);
+        }
+      });
+    } else if (cardinality === 'manyToMany') {
+      const currentHasManyState = this.state[type].data[recordId][hasManyAttribute];
+      const inverseIds = Object.keys(this.state[descriptor.type].data).filter(id => (
+        inverseData[id][descriptor.inverse].includes(recordId)
+      ));
+
+      inverseIds.forEach((id) => {
+        if (!currentHasManyState.includes(id)) {
+          currentHasManyState.push(id);
+        }
+      });
+    }
+  }
+
+  /**
+   * @param {string} type
+   * @param {Object} record
    * @private
    * @function
    */
@@ -345,6 +383,8 @@ export default class Store {
         } else {
           this.syncAddedHasMany(type, record, attributeKey);
         }
+      } else if (relationshipForType[attributeKey].kind === 'hasMany') {
+        this.syncExistingHasMany(type, record, attributeKey);
       }
     });
   }
