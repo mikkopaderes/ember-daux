@@ -981,6 +981,100 @@ module('Unit | Core | store', function () {
     assert.deepEqual(store.get('username', 'username_a'), { id: 'username_a', user: null });
   });
 
+  test('should sync existing oneToMany cardinality for hasMany side', async function (assert) {
+    assert.expect(1);
+
+    // Arrange
+    const store = new Store(model);
+
+    store.add('user', {
+      id: 'user_a',
+      name: 'User A',
+      posts: [{ id: 'post_a' }],
+    });
+
+    // Act
+    const result = await store.get('post', 'post_a', () => Promise.resolve({}));
+
+    // Assert
+    assert.deepEqual(result, {
+      id: 'post_a',
+      message: null,
+      author: {
+        id: 'user_a',
+        name: 'User A',
+        blockedUsers: [],
+        country: null,
+        groups: [],
+        posts: [
+          {
+            id: 'post_a',
+            message: null,
+            author: {
+              id: 'user_a',
+              name: 'User A',
+              blockedUsers: [],
+              country: null,
+              groups: [],
+              posts: [{ id: 'post_a' }],
+              username: null,
+            },
+          },
+        ],
+        username: null,
+      },
+    });
+  });
+
+  test('should sync existing manyToMany cardinality for hasMany side', async function (assert) {
+    assert.expect(1);
+
+    // Arrange
+    const store = new Store(model);
+
+    store.add('user', {
+      id: 'user_a',
+      name: 'User A',
+      groups: [{ id: 'group_a' }],
+    });
+
+    // Act
+    const result = await store.get('group', 'group_a', () => Promise.resolve({}));
+
+    // Assert
+    assert.deepEqual(result, {
+      id: 'group_a',
+      name: null,
+      members: [
+        {
+          id: 'user_a',
+          name: 'User A',
+          blockedUsers: [],
+          country: null,
+          groups: [
+            {
+              id: 'group_a',
+              name: null,
+              members: [
+                {
+                  id: 'user_a',
+                  name: 'User A',
+                  blockedUsers: [],
+                  country: null,
+                  groups: [{ id: 'group_a' }],
+                  posts: [],
+                  username: null,
+                },
+              ],
+            },
+          ],
+          posts: [],
+          username: null,
+        },
+      ],
+    });
+  });
+
   test('should trigger subscription when adding record', function (assert) {
     assert.expect(1);
 
