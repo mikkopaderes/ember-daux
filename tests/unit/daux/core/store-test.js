@@ -941,6 +941,31 @@ module('Unit | Core | store', function () {
     assert.deepEqual(store.get('username', 'username_a'), { id: 'username_a', user: null });
   });
 
+  test('should update record relationship with data not yet in the store', function (assert) {
+    assert.expect(3);
+
+    // Arrange
+    const store = new Store(model);
+
+    store.add('user', {
+      id: 'user_a',
+      groups: [],
+      posts: [],
+    });
+
+    // Act
+    store.update('user', 'user_a', {
+      groups: [{ id: 'group_a', name: 'Group A' }],
+      posts: [{ id: 'post_a', message: 'Post A' }],
+      username: { id: 'username_a' },
+    });
+
+    // Assert
+    assert.equal(store.get('group', 'group_a').name, 'Group A');
+    assert.equal(store.get('post', 'post_a').message, 'Post A');
+    assert.equal(store.get('username', 'username_a').id, 'username_a');
+  });
+
   test('should delete record', function (assert) {
     assert.expect(4);
 

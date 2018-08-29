@@ -78,7 +78,7 @@ export default class Store {
 
       this.state[type].data[id] = normalizedRecord;
 
-      this.syncAddedRelationships(type, normalizedRecord);
+      this.syncAddedRelationships(type, updatedRecord);
       this.syncRemovedRelationships(
         type,
         normalizedRecord,
