@@ -66,8 +66,12 @@ export default class Store {
         { id },
       ));
 
-      this.set(type, updatedRecord, Object.assign({}, option, { isDeserialized: true }));
+      this.set(type, updatedRecord, { isBackgroundOperation: true, isDeserialized: true });
       this.syncRemovedRelationships(type, updatedRecord, cachedRecord);
+
+      if (!option.isBackgroundOperation) {
+        this.subscriptions.forEach(subscription => subscription());
+      }
     } else {
       throw new Error('Record doesn\'t exist');
     }
@@ -86,9 +90,12 @@ export default class Store {
       const modelForType = this.model[type];
       const defaultRecord = getDefaultRecord(modelForType, type);
 
-      this.update(type, id, defaultRecord, option);
-      this.syncRemovedRelationships(type, defaultRecord, cachedRecord);
+      this.update(type, id, defaultRecord, { isBackgroundOperation: true });
       delete this.state[type].data[id];
+
+      if (!option.isBackgroundOperation) {
+        this.subscriptions.forEach(subscription => subscription());
+      }
     } else {
       throw new Error('Record doesn\'t exist');
     }

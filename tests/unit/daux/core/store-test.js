@@ -270,7 +270,7 @@ module('Unit | Core | store', function () {
       groups: [],
       posts: [],
       username: null,
-    }, { isDeserialized: true }));
+    }, { isBackgroundOperation: true, isDeserialized: true }));
   });
 
   test('throw error when updating a record that does not exist', function (assert) {
@@ -426,7 +426,7 @@ module('Unit | Core | store', function () {
       groups: [],
       posts: [],
       username: null,
-    }, {}));
+    }, { isBackgroundOperation: true }));
   });
 
   test('should delete a record for a model type', function (assert) {
