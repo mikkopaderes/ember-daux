@@ -406,22 +406,6 @@ export default class Store {
   }
 
   /**
-   * @param {Object} descriptor
-   * @return {Object|null} Relationship inverse descriptor
-   * @private
-   * @function
-   */
-  getRelationshipInverseDescriptor(descriptor) {
-    if (descriptor.inverse) {
-      const model = this.model[descriptor.type];
-
-      return model.relationship[descriptor.inverse];
-    }
-
-    return null;
-  }
-
-  /**
    * @param {string} type
    * @param {Object} currentRecord
    * @param {Object} oldRecord
