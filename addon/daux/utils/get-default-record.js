@@ -1,18 +1,16 @@
 /**
- * @param {Daux.Core.Store} store
- * @param {string} type
+ * @param {Daux.Core.Model} model
  * @return {Object} Default record
  */
-export default function getDefaultRecord(store, type) {
+export default function getDefaultRecord(model) {
   const defaultRecord = {};
-  const modelForType = store.model[type];
 
-  modelForType.attributes.forEach((attribute) => {
+  model.attributes.forEach((attribute) => {
     defaultRecord[attribute] = null;
   });
 
-  Object.keys(modelForType.relationship).forEach((relationshipKey) => {
-    if (modelForType.relationship[relationshipKey].kind === 'belongsTo') {
+  Object.keys(model.relationship).forEach((relationshipKey) => {
+    if (model.relationship[relationshipKey].kind === 'belongsTo') {
       defaultRecord[relationshipKey] = null;
     } else {
       defaultRecord[relationshipKey] = [];

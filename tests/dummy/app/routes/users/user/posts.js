@@ -15,7 +15,7 @@ export default Route.extend({
       const batch = this.store.batch();
       const post = { id: 'post_a', message: 'Hello world' };
 
-      batch.add('post', post);
+      batch.set('post', post);
       batch.update('user', user.id, { posts: [post] });
       batch.commit({ isBackgroundOperation: true });
     }

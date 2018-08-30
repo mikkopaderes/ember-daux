@@ -25,18 +25,6 @@ export default class Batch {
 
   /**
    * @param {string} type
-   * @param {Object} record
-   * @function
-   */
-  add(type, record) {
-    this.queues.push({
-      operation: 'add',
-      data: { type, record },
-    });
-  }
-
-  /**
-   * @param {string} type
    * @param {string} id
    * @param {Object} attribute
    * @function
@@ -76,8 +64,6 @@ export default class Batch {
 
       if (operation === 'set') {
         this.store.set(data.type, data.records, finalOption);
-      } else if (operation === 'add') {
-        this.store.add(data.type, data.record, finalOption);
       } else if (operation === 'update') {
         this.store.update(data.type, data.id, data.attribute, finalOption);
       } else if (operation === 'delete') {

@@ -9,184 +9,35 @@ import model from '../../../helpers/model';
 module('Unit | Core | store', function () {
   QUnit.dump.maxDepth = 10;
 
-  test('should get record using cache', function (assert) {
+  test('should set record without relationship', function (assert) {
     assert.expect(1);
 
     // Arrange
     const store = new Store(model);
 
-    store.set('user', [
-      {
-        id: 'user_a',
-        name: 'User A',
-        blockedUsers: ['user_b'],
-        country: 'monaco',
-        groups: ['group_a'],
-        posts: ['post_a'],
-        username: 'username_a',
-      },
-      {
-        id: 'user_b',
-        name: 'User B',
-        blockedUsers: [],
-        country: null,
-        groups: [],
-        posts: [],
-        username: null,
-      },
-    ]);
-    store.set('country', [{ id: 'monaco', name: 'Monaco' }]);
-    store.set('group', [{ id: 'group_a', name: 'Group A', members: ['user_a'] }]);
-    store.set('post', [{ id: 'post_a', message: 'Post A', author: 'user_a' }]);
-    store.set('username', [{ id: 'username_a', user: 'user_a' }]);
-
     // Act
-    const result = store.get('user', 'user_a');
+    store.set('user', { id: 'user_a', name: 'User A' });
 
     // Assert
-    assert.deepEqual(result, {
+    assert.deepEqual(store.get('user', 'user_a'), {
       id: 'user_a',
       name: 'User A',
-      country: { id: 'monaco', name: 'Monaco' },
-      blockedUsers: [
-        {
-          id: 'user_b',
-          name: 'User B',
-          blockedUsers: [],
-          country: null,
-          groups: [],
-          posts: [],
-          username: null,
-        },
-      ],
-      groups: [
-        {
-          id: 'group_a',
-          name: 'Group A',
-          members: [
-            {
-              id: 'user_a',
-              name: 'User A',
-              blockedUsers: [
-                {
-                  id: 'user_b',
-                  name: 'User B',
-                  blockedUsers: [],
-                  country: null,
-                  groups: [],
-                  posts: [],
-                  username: null,
-                },
-              ],
-              country: { id: 'monaco', name: 'Monaco' },
-              groups: [
-                {
-                  id: 'group_a',
-                  name: 'Group A',
-                  members: [{ id: 'user_a' }],
-                },
-              ],
-              posts: [
-                {
-                  id: 'post_a',
-                  message: 'Post A',
-                  author: { id: 'user_a' },
-                },
-              ],
-              username: {
-                id: 'username_a',
-                user: { id: 'user_a' },
-              },
-            },
-          ],
-        },
-      ],
-      posts: [
-        {
-          id: 'post_a',
-          message: 'Post A',
-          author: {
-            id: 'user_a',
-            name: 'User A',
-            blockedUsers: [
-              {
-                id: 'user_b',
-                name: 'User B',
-                blockedUsers: [],
-                country: null,
-                groups: [],
-                posts: [],
-                username: null,
-              },
-            ],
-            country: { id: 'monaco', name: 'Monaco' },
-            groups: [
-              {
-                id: 'group_a',
-                name: 'Group A',
-                members: [{ id: 'user_a' }],
-              },
-            ],
-            posts: [
-              {
-                id: 'post_a',
-                message: 'Post A',
-                author: { id: 'user_a' },
-              },
-            ],
-            username: {
-              id: 'username_a',
-              user: { id: 'user_a' },
-            },
-          },
-        },
-      ],
-      username: {
-        id: 'username_a',
-        user: {
-          id: 'user_a',
-          name: 'User A',
-          blockedUsers: [
-            {
-              id: 'user_b',
-              name: 'User B',
-              blockedUsers: [],
-              country: null,
-              groups: [],
-              posts: [],
-              username: null,
-            },
-          ],
-          country: { id: 'monaco', name: 'Monaco' },
-          groups: [
-            {
-              id: 'group_a',
-              name: 'Group A',
-              members: [{ id: 'user_a' }],
-            },
-          ],
-          posts: [
-            {
-              id: 'post_a',
-              message: 'Post A',
-              author: { id: 'user_a' },
-            },
-          ],
-          username: {
-            id: 'username_a',
-            user: { id: 'user_a' },
-          },
-        },
-      },
+      blockedUsers: [],
+      country: null,
+      groups: [],
+      posts: [],
+      username: null,
     });
   });
 
-  test('should get record using fetch', async function (assert) {
+  test('should set record with embedded relationship', function (assert) {
     assert.expect(1);
 
     // Arrange
     const store = new Store(model);
-    const user = {
+
+    // Act
+    store.set('user', {
       id: 'user_a',
       name: 'User A',
       blockedUsers: [
@@ -201,19 +52,15 @@ module('Unit | Core | store', function () {
         },
       ],
       country: { id: 'monaco', name: 'Monaco' },
-      groups: [{ id: 'group_a', name: 'Group A' }],
-      posts: [{ id: 'post_a', message: 'Post A' }],
+      groups: [{ id: 'group_a', name: 'Group A', members: ['user_a', 'user_c'] }],
+      posts: [{ id: 'post_a', message: 'Post A', author: 'user_a' }],
       username: { id: 'username_a', user: 'user_a' },
-    };
-
-    // Act
-    const result = await store.get('user', 'user_a', () => Promise.resolve(user));
+    });
 
     // Assert
-    assert.deepEqual(result, {
+    assert.deepEqual(store.get('user', 'user_a'), {
       id: 'user_a',
       name: 'User A',
-      country: { id: 'monaco', name: 'Monaco' },
       blockedUsers: [
         {
           id: 'user_b',
@@ -225,680 +72,21 @@ module('Unit | Core | store', function () {
           username: null,
         },
       ],
-      groups: [
-        {
-          id: 'group_a',
-          name: 'Group A',
-          members: [
-            {
-              id: 'user_a',
-              name: 'User A',
-              blockedUsers: [
-                {
-                  id: 'user_b',
-                  name: 'User B',
-                  blockedUsers: [],
-                  country: null,
-                  groups: [],
-                  posts: [],
-                  username: null,
-                },
-              ],
-              country: { id: 'monaco', name: 'Monaco' },
-              groups: [
-                {
-                  id: 'group_a',
-                  name: 'Group A',
-                  members: [{ id: 'user_a' }],
-                },
-              ],
-              posts: [
-                {
-                  id: 'post_a',
-                  message: 'Post A',
-                  author: { id: 'user_a' },
-                },
-              ],
-              username: {
-                id: 'username_a',
-                user: { id: 'user_a' },
-              },
-            },
-          ],
-        },
-      ],
-      posts: [
-        {
-          id: 'post_a',
-          message: 'Post A',
-          author: {
-            id: 'user_a',
-            name: 'User A',
-            blockedUsers: [
-              {
-                id: 'user_b',
-                name: 'User B',
-                blockedUsers: [],
-                country: null,
-                groups: [],
-                posts: [],
-                username: null,
-              },
-            ],
-            country: { id: 'monaco', name: 'Monaco' },
-            groups: [
-              {
-                id: 'group_a',
-                name: 'Group A',
-                members: [{ id: 'user_a' }],
-              },
-            ],
-            posts: [
-              {
-                id: 'post_a',
-                message: 'Post A',
-                author: { id: 'user_a' },
-              },
-            ],
-            username: {
-              id: 'username_a',
-              user: { id: 'user_a' },
-            },
-          },
-        },
-      ],
-      username: {
-        id: 'username_a',
-        user: {
-          id: 'user_a',
-          name: 'User A',
-          blockedUsers: [
-            {
-              id: 'user_b',
-              name: 'User B',
-              blockedUsers: [],
-              country: null,
-              groups: [],
-              posts: [],
-              username: null,
-            },
-          ],
-          country: { id: 'monaco', name: 'Monaco' },
-          groups: [
-            {
-              id: 'group_a',
-              name: 'Group A',
-              members: [{ id: 'user_a' }],
-            },
-          ],
-          posts: [
-            {
-              id: 'post_a',
-              message: 'Post A',
-              author: { id: 'user_a' },
-            },
-          ],
-          username: {
-            id: 'username_a',
-            user: { id: 'user_a' },
-          },
-        },
-      },
+      country: { id: 'monaco', name: 'Monaco' },
+      groups: [{ id: 'group_a', name: 'Group A', members: ['user_a'] }],
+      posts: [{ id: 'post_a', message: 'Post A', author: 'user_a' }],
+      username: { id: 'username_a', user: 'user_a' },
     });
   });
 
-  test('should return null when getting a record that does not exist', function (assert) {
+  test('should set record with non-embedded relationship', function (assert) {
     assert.expect(1);
 
     // Arrange
     const store = new Store(model);
 
     // Act
-    const result = store.get('user', 'user_a');
-
-    // Assert
-    assert.equal(result, null);
-  });
-
-  test('should get all records for a model using cache', function (assert) {
-    assert.expect(1);
-
-    // Arrange
-    const store = new Store(model);
-
-    store.set('user', [
-      {
-        id: 'user_a',
-        name: 'User A',
-        blockedUsers: ['user_b'],
-        country: 'monaco',
-        groups: ['group_a'],
-        posts: ['post_a'],
-        username: 'username_a',
-      },
-      {
-        id: 'user_b',
-        name: 'User B',
-        blockedUsers: [],
-        country: null,
-        groups: [],
-        posts: [],
-        username: null,
-      },
-    ]);
-    store.set('country', [{ id: 'monaco', name: 'Monaco' }]);
-    store.set('group', [{ id: 'group_a', name: 'Group A', members: ['user_a'] }]);
-    store.set('post', [{ id: 'post_a', message: 'Post A', author: 'user_a' }]);
-    store.set('username', [{ id: 'username_a', user: 'user_a' }]);
-
-    // Act
-    const result = store.getAll('user');
-
-    // Assert
-    assert.deepEqual(result, [
-      {
-        id: 'user_a',
-        name: 'User A',
-        country: { id: 'monaco', name: 'Monaco' },
-        blockedUsers: [
-          {
-            id: 'user_b',
-            name: 'User B',
-            blockedUsers: [],
-            country: null,
-            groups: [],
-            posts: [],
-            username: null,
-          },
-        ],
-        groups: [
-          {
-            id: 'group_a',
-            name: 'Group A',
-            members: [
-              {
-                id: 'user_a',
-                name: 'User A',
-                blockedUsers: [
-                  {
-                    id: 'user_b',
-                    name: 'User B',
-                    blockedUsers: [],
-                    country: null,
-                    groups: [],
-                    posts: [],
-                    username: null,
-                  },
-                ],
-                country: { id: 'monaco', name: 'Monaco' },
-                groups: [
-                  {
-                    id: 'group_a',
-                    name: 'Group A',
-                    members: [{ id: 'user_a' }],
-                  },
-                ],
-                posts: [
-                  {
-                    id: 'post_a',
-                    message: 'Post A',
-                    author: { id: 'user_a' },
-                  },
-                ],
-                username: {
-                  id: 'username_a',
-                  user: { id: 'user_a' },
-                },
-              },
-            ],
-          },
-        ],
-        posts: [
-          {
-            id: 'post_a',
-            message: 'Post A',
-            author: {
-              id: 'user_a',
-              name: 'User A',
-              blockedUsers: [
-                {
-                  id: 'user_b',
-                  name: 'User B',
-                  blockedUsers: [],
-                  country: null,
-                  groups: [],
-                  posts: [],
-                  username: null,
-                },
-              ],
-              country: { id: 'monaco', name: 'Monaco' },
-              groups: [
-                {
-                  id: 'group_a',
-                  name: 'Group A',
-                  members: [{ id: 'user_a' }],
-                },
-              ],
-              posts: [
-                {
-                  id: 'post_a',
-                  message: 'Post A',
-                  author: { id: 'user_a' },
-                },
-              ],
-              username: {
-                id: 'username_a',
-                user: { id: 'user_a' },
-              },
-            },
-          },
-        ],
-        username: {
-          id: 'username_a',
-          user: {
-            id: 'user_a',
-            name: 'User A',
-            blockedUsers: [
-              {
-                id: 'user_b',
-                name: 'User B',
-                blockedUsers: [],
-                country: null,
-                groups: [],
-                posts: [],
-                username: null,
-              },
-            ],
-            country: { id: 'monaco', name: 'Monaco' },
-            groups: [
-              {
-                id: 'group_a',
-                name: 'Group A',
-                members: [{ id: 'user_a' }],
-              },
-            ],
-            posts: [
-              {
-                id: 'post_a',
-                message: 'Post A',
-                author: { id: 'user_a' },
-              },
-            ],
-            username: {
-              id: 'username_a',
-              user: { id: 'user_a' },
-            },
-          },
-        },
-      },
-      {
-        id: 'user_b',
-        name: 'User B',
-        blockedUsers: [],
-        country: null,
-        groups: [],
-        posts: [],
-        username: null,
-      },
-    ]);
-  });
-
-  test('should get all records for a model using fetch', async function (assert) {
-    assert.expect(1);
-
-    // Arrange
-    const store = new Store(model);
-    const users = [
-      {
-        id: 'user_a',
-        name: 'User A',
-        blockedUsers: [
-          {
-            id: 'user_b',
-            name: 'User B',
-            blockedUsers: [],
-            country: null,
-            groups: [],
-            posts: [],
-            username: null,
-          },
-        ],
-        country: { id: 'monaco', name: 'Monaco' },
-        groups: [{ id: 'group_a', name: 'Group A' }],
-        posts: [{ id: 'post_a', message: 'Post A' }],
-        username: { id: 'username_a', user: 'user_a' },
-      },
-    ];
-
-    // Act
-    const result = await store.getAll('user', () => Promise.resolve(users));
-
-    // Assert
-    assert.deepEqual(result, [
-      {
-        id: 'user_a',
-        name: 'User A',
-        country: { id: 'monaco', name: 'Monaco' },
-        blockedUsers: [
-          {
-            id: 'user_b',
-            name: 'User B',
-            blockedUsers: [],
-            country: null,
-            groups: [],
-            posts: [],
-            username: null,
-          },
-        ],
-        groups: [
-          {
-            id: 'group_a',
-            name: 'Group A',
-            members: [
-              {
-                id: 'user_a',
-                name: 'User A',
-                blockedUsers: [
-                  {
-                    id: 'user_b',
-                    name: 'User B',
-                    blockedUsers: [],
-                    country: null,
-                    groups: [],
-                    posts: [],
-                    username: null,
-                  },
-                ],
-                country: { id: 'monaco', name: 'Monaco' },
-                groups: [
-                  {
-                    id: 'group_a',
-                    name: 'Group A',
-                    members: [{ id: 'user_a' }],
-                  },
-                ],
-                posts: [
-                  {
-                    id: 'post_a',
-                    message: 'Post A',
-                    author: { id: 'user_a' },
-                  },
-                ],
-                username: {
-                  id: 'username_a',
-                  user: { id: 'user_a' },
-                },
-              },
-            ],
-          },
-        ],
-        posts: [
-          {
-            id: 'post_a',
-            message: 'Post A',
-            author: {
-              id: 'user_a',
-              name: 'User A',
-              blockedUsers: [
-                {
-                  id: 'user_b',
-                  name: 'User B',
-                  blockedUsers: [],
-                  country: null,
-                  groups: [],
-                  posts: [],
-                  username: null,
-                },
-              ],
-              country: { id: 'monaco', name: 'Monaco' },
-              groups: [
-                {
-                  id: 'group_a',
-                  name: 'Group A',
-                  members: [{ id: 'user_a' }],
-                },
-              ],
-              posts: [
-                {
-                  id: 'post_a',
-                  message: 'Post A',
-                  author: { id: 'user_a' },
-                },
-              ],
-              username: {
-                id: 'username_a',
-                user: { id: 'user_a' },
-              },
-            },
-          },
-        ],
-        username: {
-          id: 'username_a',
-          user: {
-            id: 'user_a',
-            name: 'User A',
-            blockedUsers: [
-              {
-                id: 'user_b',
-                name: 'User B',
-                blockedUsers: [],
-                country: null,
-                groups: [],
-                posts: [],
-                username: null,
-              },
-            ],
-            country: { id: 'monaco', name: 'Monaco' },
-            groups: [
-              {
-                id: 'group_a',
-                name: 'Group A',
-                members: [{ id: 'user_a' }],
-              },
-            ],
-            posts: [
-              {
-                id: 'post_a',
-                message: 'Post A',
-                author: { id: 'user_a' },
-              },
-            ],
-            username: {
-              id: 'username_a',
-              user: { id: 'user_a' },
-            },
-          },
-        },
-      },
-      {
-        id: 'user_b',
-        name: 'User B',
-        blockedUsers: [],
-        country: null,
-        groups: [],
-        posts: [],
-        username: null,
-      },
-    ]);
-  });
-
-  test('should query records', async function (assert) {
-    assert.expect(1);
-
-    // Arrange
-    const store = new Store(model);
-    const users = [
-      {
-        id: 'user_a',
-        name: 'User A',
-        blockedUsers: [
-          {
-            id: 'user_b',
-            name: 'User B',
-            blockedUsers: [],
-            country: null,
-            groups: [],
-            posts: [],
-            username: null,
-          },
-        ],
-        country: { id: 'monaco', name: 'Monaco' },
-        groups: [{ id: 'group_a', name: 'Group A' }],
-        posts: [{ id: 'post_a', message: 'Post A' }],
-        username: { id: 'username_a', user: 'user_a' },
-      },
-    ];
-
-    // Act
-    const result = await store.query('user', () => Promise.resolve(users));
-
-    // Assert
-    assert.deepEqual(result, [
-      {
-        id: 'user_a',
-        name: 'User A',
-        country: { id: 'monaco', name: 'Monaco' },
-        blockedUsers: [
-          {
-            id: 'user_b',
-            name: 'User B',
-            blockedUsers: [],
-            country: null,
-            groups: [],
-            posts: [],
-            username: null,
-          },
-        ],
-        groups: [
-          {
-            id: 'group_a',
-            name: 'Group A',
-            members: [
-              {
-                id: 'user_a',
-                name: 'User A',
-                blockedUsers: [
-                  {
-                    id: 'user_b',
-                    name: 'User B',
-                    blockedUsers: [],
-                    country: null,
-                    groups: [],
-                    posts: [],
-                    username: null,
-                  },
-                ],
-                country: { id: 'monaco', name: 'Monaco' },
-                groups: [
-                  {
-                    id: 'group_a',
-                    name: 'Group A',
-                    members: [{ id: 'user_a' }],
-                  },
-                ],
-                posts: [
-                  {
-                    id: 'post_a',
-                    message: 'Post A',
-                    author: { id: 'user_a' },
-                  },
-                ],
-                username: {
-                  id: 'username_a',
-                  user: { id: 'user_a' },
-                },
-              },
-            ],
-          },
-        ],
-        posts: [
-          {
-            id: 'post_a',
-            message: 'Post A',
-            author: {
-              id: 'user_a',
-              name: 'User A',
-              blockedUsers: [
-                {
-                  id: 'user_b',
-                  name: 'User B',
-                  blockedUsers: [],
-                  country: null,
-                  groups: [],
-                  posts: [],
-                  username: null,
-                },
-              ],
-              country: { id: 'monaco', name: 'Monaco' },
-              groups: [
-                {
-                  id: 'group_a',
-                  name: 'Group A',
-                  members: [{ id: 'user_a' }],
-                },
-              ],
-              posts: [
-                {
-                  id: 'post_a',
-                  message: 'Post A',
-                  author: { id: 'user_a' },
-                },
-              ],
-              username: {
-                id: 'username_a',
-                user: { id: 'user_a' },
-              },
-            },
-          },
-        ],
-        username: {
-          id: 'username_a',
-          user: {
-            id: 'user_a',
-            name: 'User A',
-            blockedUsers: [
-              {
-                id: 'user_b',
-                name: 'User B',
-                blockedUsers: [],
-                country: null,
-                groups: [],
-                posts: [],
-                username: null,
-              },
-            ],
-            country: { id: 'monaco', name: 'Monaco' },
-            groups: [
-              {
-                id: 'group_a',
-                name: 'Group A',
-                members: [{ id: 'user_a' }],
-              },
-            ],
-            posts: [
-              {
-                id: 'post_a',
-                message: 'Post A',
-                author: { id: 'user_a' },
-              },
-            ],
-            username: {
-              id: 'username_a',
-              user: { id: 'user_a' },
-            },
-          },
-        },
-      },
-    ]);
-  });
-
-  test('should update record', function (assert) {
-    assert.expect(4);
-
-    // Arrange
-    const store = new Store(model);
-
-    store.add('user', {
+    store.set('user', {
       id: 'user_a',
       name: 'User A',
       blockedUsers: ['user_b'],
@@ -908,228 +96,125 @@ module('Unit | Core | store', function () {
       username: 'username_a',
     });
 
+    // Assert
+    assert.deepEqual(store.get('user', 'user_a'), {
+      id: 'user_a',
+      name: 'User A',
+      blockedUsers: [
+        {
+          id: 'user_b',
+          name: null,
+          blockedUsers: [],
+          country: null,
+          groups: [],
+          posts: [],
+          username: null,
+        },
+      ],
+      country: { id: 'monaco', name: null },
+      groups: [{ id: 'group_a', name: null, members: ['user_a'] }],
+      posts: [{ id: 'post_a', message: null, author: 'user_a' }],
+      username: { id: 'username_a', user: 'user_a' },
+    });
+  });
+
+  test('should throw error when setting a record without ID', function (assert) {
+    assert.expect(1);
+
+    // Arrange
+    const store = new Store(model);
+
+    try {
+      // Act
+      store.set('user', { name: 'User A' });
+    } catch (error) {
+      // Assert
+      assert.equal(error.message, 'Record to set has no ID');
+    }
+  });
+
+  test('should sync new one-to-one relationship when setting record', function (assert) {
+    assert.expect(2);
+
+    // Arrange
+    const store = new Store(model);
+
+    store.set('username', { id: 'username_a' });
+
     // Act
-    store.update('user', 'user_a', {
-      name: 'Foo',
-      blockedUsers: [],
-      country: null,
-      groups: [],
-      posts: [],
-      username: null,
+    store.set('user', {
+      id: 'user_a',
+      name: 'User A',
+      username: 'username_a',
     });
 
     // Assert
     assert.deepEqual(store.get('user', 'user_a'), {
       id: 'user_a',
-      name: 'Foo',
+      name: 'User A',
       blockedUsers: [],
       country: null,
       groups: [],
       posts: [],
+      username: { id: 'username_a', user: 'user_a' },
+    });
+    assert.equal(store.get('username', 'username_a').user.id, 'user_a');
+  });
+
+  test('should sync new one-to-many relationship when setting record', function (assert) {
+    assert.expect(2);
+
+    // Arrange
+    const store = new Store(model);
+
+    store.set('post', { id: 'post_a', author: 'user_a' });
+
+    // Act
+    store.set('user', {
+      id: 'user_a',
+      name: 'User A',
+      posts: ['post_a'],
+    });
+
+    // Assert
+    assert.deepEqual(store.get('user', 'user_a'), {
+      id: 'user_a',
+      name: 'User A',
+      blockedUsers: [],
+      country: null,
+      groups: [],
+      posts: [{ id: 'post_a', message: null, author: 'user_a' }],
       username: null,
     });
-    assert.deepEqual(store.get('group', 'group_a'), {
-      id: 'group_a',
-      name: null,
-      members: [],
-    });
-    assert.deepEqual(store.get('post', 'post_a'), {
-      id: 'post_a',
-      message: null,
-      author: null,
-    });
-    assert.deepEqual(store.get('username', 'username_a'), { id: 'username_a', user: null });
+    assert.equal(store.get('post', 'post_a').author.id, 'user_a');
   });
 
-  test('should update record relationship with data not yet in the store', function (assert) {
-    assert.expect(3);
+  test('should sync new many-to-many relationship when setting record', function (assert) {
+    assert.expect(2);
 
     // Arrange
     const store = new Store(model);
 
-    store.add('user', {
+    store.set('group', { id: 'group_a', members: ['user_a'] });
+
+    // Act
+    store.set('user', {
       id: 'user_a',
-      groups: [],
+      name: 'User A',
+      groups: ['group_a'],
+    });
+
+    // Assert
+    assert.deepEqual(store.get('user', 'user_a'), {
+      id: 'user_a',
+      name: 'User A',
+      blockedUsers: [],
+      country: null,
+      groups: [{ id: 'group_a', name: null, members: ['user_a'] }],
       posts: [],
+      username: null,
     });
-
-    // Act
-    store.update('user', 'user_a', {
-      groups: [{ id: 'group_a', name: 'Group A' }],
-      posts: [{ id: 'post_a', message: 'Post A' }],
-      username: { id: 'username_a' },
-    });
-
-    // Assert
-    assert.equal(store.get('group', 'group_a').name, 'Group A');
-    assert.equal(store.get('post', 'post_a').message, 'Post A');
-    assert.equal(store.get('username', 'username_a').id, 'username_a');
-  });
-
-  test('should delete record', function (assert) {
-    assert.expect(4);
-
-    // Arrange
-    const store = new Store(model);
-
-    store.set('user', [
-      {
-        id: 'user_a',
-        name: 'User A',
-        blockedUsers: ['user_b'],
-        country: 'monaco',
-        groups: ['group_a'],
-        posts: ['post_a'],
-        username: 'username_a',
-      },
-    ]);
-    store.set('country', [{ id: 'monaco', name: 'Monaco' }]);
-    store.set('group', [{ id: 'group_a', name: 'Group A', members: ['user_a'] }]);
-    store.set('post', [{ id: 'post_a', message: 'Post A', author: 'user_a' }]);
-    store.set('username', [{ id: 'username_a', user: 'user_a' }]);
-
-    // Act
-    store.delete('user', 'user_a');
-
-    // Assert
-    assert.equal(store.get('user', 'user_a'), null);
-    assert.deepEqual(store.get('group', 'group_a'), {
-      id: 'group_a',
-      name: 'Group A',
-      members: [],
-    });
-    assert.deepEqual(store.get('post', 'post_a'), {
-      id: 'post_a',
-      message: 'Post A',
-      author: null,
-    });
-    assert.deepEqual(store.get('username', 'username_a'), { id: 'username_a', user: null });
-  });
-
-  test('should sync existing oneToMany cardinality for hasMany side', async function (assert) {
-    assert.expect(1);
-
-    // Arrange
-    const store = new Store(model);
-
-    store.add('user', {
-      id: 'user_a',
-      name: 'User A',
-      posts: [{ id: 'post_a' }],
-    });
-
-    // Act
-    const result = await store.get('post', 'post_a', () => Promise.resolve({}));
-
-    // Assert
-    assert.deepEqual(result, {
-      id: 'post_a',
-      message: null,
-      author: {
-        id: 'user_a',
-        name: 'User A',
-        blockedUsers: [],
-        country: null,
-        groups: [],
-        posts: [
-          {
-            id: 'post_a',
-            message: null,
-            author: {
-              id: 'user_a',
-              name: 'User A',
-              blockedUsers: [],
-              country: null,
-              groups: [],
-              posts: [{ id: 'post_a' }],
-              username: null,
-            },
-          },
-        ],
-        username: null,
-      },
-    });
-  });
-
-  test('should sync existing manyToMany cardinality for hasMany side', async function (assert) {
-    assert.expect(1);
-
-    // Arrange
-    const store = new Store(model);
-
-    store.add('user', {
-      id: 'user_a',
-      name: 'User A',
-      groups: [{ id: 'group_a' }],
-    });
-
-    // Act
-    const result = await store.get('group', 'group_a', () => Promise.resolve({}));
-
-    // Assert
-    assert.deepEqual(result, {
-      id: 'group_a',
-      name: null,
-      members: [
-        {
-          id: 'user_a',
-          name: 'User A',
-          blockedUsers: [],
-          country: null,
-          groups: [
-            {
-              id: 'group_a',
-              name: null,
-              members: [
-                {
-                  id: 'user_a',
-                  name: 'User A',
-                  blockedUsers: [],
-                  country: null,
-                  groups: [{ id: 'group_a' }],
-                  posts: [],
-                  username: null,
-                },
-              ],
-            },
-          ],
-          posts: [],
-          username: null,
-        },
-      ],
-    });
-  });
-
-  test('should trigger subscription when adding record', function (assert) {
-    assert.expect(1);
-
-    // Arrange
-    const stub = sinon.stub();
-    const store = new Store(model);
-
-    store.subscribe(stub);
-
-    // Act
-    store.add('user', { id: 'user_a' });
-
-    // Assert
-    assert.ok(stub.calledOnce);
-  });
-
-  test('should not trigger subscription when adding record with a true background operation option', function (assert) {
-    assert.expect(1);
-
-    // Arrange
-    const stub = sinon.stub();
-    const store = new Store(model);
-
-    store.subscribe(stub);
-
-    // Act
-    store.add('user', { id: 'user_a' }, { isBackgroundOperation: true });
-
-    // Assert
-    assert.ok(stub.notCalled);
+    assert.equal(store.get('group', 'group_a').members[0].id, 'user_a');
   });
 
   test('should trigger subscription when setting record', function (assert) {
@@ -1142,7 +227,7 @@ module('Unit | Core | store', function () {
     store.subscribe(stub);
 
     // Act
-    store.set('user', [{ id: 'user_a' }]);
+    store.set('user', { id: 'user_a' });
 
     // Assert
     assert.ok(stub.calledOnce);
@@ -1158,10 +243,133 @@ module('Unit | Core | store', function () {
     store.subscribe(stub);
 
     // Act
-    store.set('user', [{ id: 'user_a' }], { isBackgroundOperation: true });
+    store.set('user', { id: 'user_a' }, { isBackgroundOperation: true });
 
     // Assert
     assert.ok(stub.notCalled);
+  });
+
+  test('should call set when updating record', function (assert) {
+    assert.expect(1);
+
+    // Arrange
+    const store = new Store(model);
+    const setStub = sinon.spy(store, 'set');
+
+    store.set('user', { id: 'user_a', name: 'User A' });
+
+    // Act
+    store.update('user', 'user_a', { country: { id: 'monaco', name: 'Monaco' } });
+
+    // Assert
+    assert.ok(setStub.calledWithExactly('user', {
+      id: 'user_a',
+      name: 'User A',
+      blockedUsers: [],
+      country: { id: 'monaco', name: 'Monaco' },
+      groups: [],
+      posts: [],
+      username: null,
+    }, { isDeserialized: true }));
+  });
+
+  test('throw error when updating a record that does not exist', function (assert) {
+    assert.expect(1);
+
+    // Arrange
+    const store = new Store(model);
+
+    try {
+      // Act
+      store.update('user', { id: 'user_a' });
+    } catch (error) {
+      // Assert
+      assert.equal(error.message, 'Record doesn\'t exist');
+    }
+  });
+
+  test('should sync removed one-to-one relationship when updating record', function (assert) {
+    assert.expect(2);
+
+    // Arrange
+    const store = new Store(model);
+
+    store.set('user', {
+      id: 'user_a',
+      name: 'User A',
+      username: 'username_a',
+    });
+
+    // Act
+    store.update('user', 'user_a', { username: null });
+
+    // Assert
+    assert.deepEqual(store.get('user', 'user_a'), {
+      id: 'user_a',
+      name: 'User A',
+      blockedUsers: [],
+      country: null,
+      groups: [],
+      posts: [],
+      username: null,
+    });
+    assert.equal(store.get('username', 'username_a').user, null);
+  });
+
+  test('should sync removed one-to-many relationship when setting record', function (assert) {
+    assert.expect(2);
+
+    // Arrange
+    const store = new Store(model);
+
+    store.set('user', {
+      id: 'user_a',
+      name: 'User A',
+      posts: ['post_a'],
+    });
+
+    // Act
+    store.update('user', 'user_a', { posts: [] });
+
+    // Assert
+    assert.deepEqual(store.get('user', 'user_a'), {
+      id: 'user_a',
+      name: 'User A',
+      blockedUsers: [],
+      country: null,
+      groups: [],
+      posts: [],
+      username: null,
+    });
+    assert.equal(store.get('post', 'post_a').author, null);
+  });
+
+  test('should sync removed many-to-many relationship when setting record', function (assert) {
+    assert.expect(2);
+
+    // Arrange
+    const store = new Store(model);
+
+    store.set('user', {
+      id: 'user_a',
+      name: 'User A',
+      groups: ['group_a'],
+    });
+
+    // Act
+    store.update('user', 'user_a', { groups: [] });
+
+    // Assert
+    assert.deepEqual(store.get('user', 'user_a'), {
+      id: 'user_a',
+      name: 'User A',
+      blockedUsers: [],
+      country: null,
+      groups: [],
+      posts: [],
+      username: null,
+    });
+    assert.deepEqual(store.get('group', 'group_a').members, []);
   });
 
   test('should trigger subscription when updating record', function (assert) {
@@ -1171,7 +379,7 @@ module('Unit | Core | store', function () {
     const stub = sinon.stub();
     const store = new Store(model);
 
-    store.add('user', { id: 'user_a' });
+    store.set('user', { id: 'user_a' });
     store.subscribe(stub);
 
     // Act
@@ -1188,7 +396,7 @@ module('Unit | Core | store', function () {
     const stub = sinon.stub();
     const store = new Store(model);
 
-    store.add('user', { id: 'user_a' });
+    store.set('user', { id: 'user_a' });
     store.subscribe(stub);
 
     // Act
@@ -1198,6 +406,44 @@ module('Unit | Core | store', function () {
     assert.ok(stub.notCalled);
   });
 
+  test('should call update when deleting record', function (assert) {
+    assert.expect(1);
+
+    // Arrange
+    const store = new Store(model);
+    const updateStub = sinon.spy(store, 'update');
+
+    store.set('user', { id: 'user_a', name: 'User A' });
+
+    // Act
+    store.delete('user', 'user_a');
+
+    // Assert
+    assert.ok(updateStub.calledWithExactly('user', 'user_a', {
+      name: null,
+      blockedUsers: [],
+      country: null,
+      groups: [],
+      posts: [],
+      username: null,
+    }, {}));
+  });
+
+  test('should delete a record for a model type', function (assert) {
+    assert.expect(1);
+
+    // Arrange
+    const store = new Store(model);
+
+    store.set('user', { id: 'user_a', name: 'User A' });
+
+    // Act
+    store.delete('user', 'user_a');
+
+    // Assert
+    assert.equal(store.get('user', 'user_a'), null);
+  });
+
   test('should trigger subscription when deleting record', function (assert) {
     assert.expect(1);
 
@@ -1205,7 +451,7 @@ module('Unit | Core | store', function () {
     const stub = sinon.stub();
     const store = new Store(model);
 
-    store.add('user', { id: 'user_a' });
+    store.set('user', { id: 'user_a' });
     store.subscribe(stub);
 
     // Act
@@ -1222,7 +468,7 @@ module('Unit | Core | store', function () {
     const stub = sinon.stub();
     const store = new Store(model);
 
-    store.add('user', { id: 'user_a' });
+    store.set('user', { id: 'user_a' });
     store.subscribe(stub);
 
     // Act
@@ -1232,7 +478,7 @@ module('Unit | Core | store', function () {
     assert.ok(stub.notCalled);
   });
 
-  test('should trigger subscription when unsubscribing', function (assert) {
+  test('should not trigger subscription when unsubscribing', function (assert) {
     assert.expect(1);
 
     // Arrange
@@ -1243,13 +489,13 @@ module('Unit | Core | store', function () {
     unsubscribe();
 
     // Act
-    store.set('user', [{ id: 'user_a' }]);
+    store.set('user', { id: 'user_a' });
 
     // Assert
     assert.ok(stub.notCalled);
   });
 
-  test('should return batch instance when calling batch', function (assert) {
+  test('should return an instance of Daux.Core.Batch when calling batch', function (assert) {
     assert.expect(1);
 
     // Arrange
@@ -1260,5 +506,148 @@ module('Unit | Core | store', function () {
 
     // Assert
     assert.ok(result instanceof Batch);
+  });
+
+  test('should call set when getting a record using a promise', async function (assert) {
+    assert.expect(1);
+
+    // Arrange
+    const user = { id: 'user_a', name: 'User A' };
+    const store = new Store(model);
+    const setSpy = sinon.spy(store, 'set');
+
+    // Act
+    await store.get('user', 'user_a', () => Promise.resolve(user));
+
+    // Assert
+    assert.ok(setSpy.calledWithExactly('user', user, { isBackgroundOperation: true }));
+  });
+
+  test('should get record for a model type using a promise', async function (assert) {
+    assert.expect(1);
+
+    // Arrange
+    const user = { id: 'user_a', name: 'User A' };
+    const store = new Store(model);
+
+    // Act
+    const result = await store.get('user', 'user_a', () => Promise.resolve(user));
+
+    // Assert
+    assert.deepEqual(result, {
+      id: 'user_a',
+      name: 'User A',
+      blockedUsers: [],
+      country: null,
+      groups: [],
+      posts: [],
+      username: null,
+    });
+  });
+
+  test('should call set per every record when getting all for a model type using a promise', async function (assert) {
+    assert.expect(2);
+
+    // Arrange
+    const users = [{ id: 'user_a', name: 'User A' }, { id: 'user_b', name: 'User B' }];
+    const store = new Store(model);
+    const setSpy = sinon.spy(store, 'set');
+
+    // Act
+    await store.getAll('user', () => Promise.resolve(users));
+
+    // Assert
+    assert.ok(setSpy.firstCall.calledWithExactly('user', users[0], {
+      isBackgroundOperation: true,
+    }));
+    assert.ok(setSpy.secondCall.calledWithExactly('user', users[1], {
+      isBackgroundOperation: true,
+    }));
+  });
+
+  test('should get all record for a model type using a promise', async function (assert) {
+    assert.expect(1);
+
+    // Arrange
+    const users = [{ id: 'user_a', name: 'User A' }, { id: 'user_b', name: 'User B' }];
+    const store = new Store(model);
+
+    // Act
+    const result = await store.getAll('user', () => Promise.resolve(users));
+
+    // Assert
+    assert.deepEqual(result, [
+      {
+        id: 'user_a',
+        name: 'User A',
+        blockedUsers: [],
+        country: null,
+        groups: [],
+        posts: [],
+        username: null,
+      },
+      {
+        id: 'user_b',
+        name: 'User B',
+        blockedUsers: [],
+        country: null,
+        groups: [],
+        posts: [],
+        username: null,
+      },
+    ]);
+  });
+
+  test('should call set per every record when querying for a model type using a promise', async function (assert) {
+    assert.expect(2);
+
+    // Arrange
+    const users = [{ id: 'user_a', name: 'User A' }, { id: 'user_b', name: 'User B' }];
+    const store = new Store(model);
+    const setSpy = sinon.spy(store, 'set');
+
+    // Act
+    await store.query('user', () => Promise.resolve(users));
+
+    // Assert
+    assert.ok(setSpy.firstCall.calledWithExactly('user', users[0], {
+      isBackgroundOperation: true,
+    }));
+    assert.ok(setSpy.secondCall.calledWithExactly('user', users[1], {
+      isBackgroundOperation: true,
+    }));
+  });
+
+  test('should query records for a model type using a promise', async function (assert) {
+    assert.expect(1);
+
+    // Arrange
+    const users = [{ id: 'user_a', name: 'User A' }, { id: 'user_b', name: 'User B' }];
+    const store = new Store(model);
+
+    // Act
+    const result = await store.query('user', () => Promise.resolve(users));
+
+    // Assert
+    assert.deepEqual(result, [
+      {
+        id: 'user_a',
+        name: 'User A',
+        blockedUsers: [],
+        country: null,
+        groups: [],
+        posts: [],
+        username: null,
+      },
+      {
+        id: 'user_b',
+        name: 'User B',
+        blockedUsers: [],
+        country: null,
+        groups: [],
+        posts: [],
+        username: null,
+      },
+    ]);
   });
 });

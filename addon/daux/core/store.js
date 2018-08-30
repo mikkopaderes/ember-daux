@@ -1,7 +1,7 @@
-import { denormalize, normalize } from './normalizer';
 import Batch from './batch';
 import getCardinality from '../utils/get-cardinality';
 import getDefaultRecord from '../utils/get-default-record';
+import normalize from '../utils/normalize';
 
 /**
  * @class Store
@@ -29,28 +29,11 @@ export default class Store {
    * @param {Object} [option={}]
    * @function
    */
-  add(type, record, option = {}) {
-    const normalizedRecord = normalize(this.model, type, record);
-    const cachedRecord = this.getCachedRecord(type, normalizedRecord.id) || {};
-
-    this.state[type].data[normalizedRecord.id] = Object.assign(normalizedRecord, cachedRecord);
-
-    this.syncAddedRelationships(type, record);
-
-    if (!option.isBackgroundOperation) {
-      this.subscriptions.forEach(subscription => subscription());
-    }
-  }
-
-  /**
-   * @param {string} type
-   * @param {Array.<Object>} records
-   * @param {Object} [option={}]
-   * @function
-   */
-  set(type, records, option = {}) {
-    records.forEach((record) => {
-      const normalizedRecord = normalize(this.model, type, record);
+  set(type, record, option = {}) {
+    if (record.id) {
+      const modelForType = this.model[type];
+      const deserializedRecord = option.isDeserialized ? record : modelForType.deserialize(record);
+      const normalizedRecord = normalize(modelForType, deserializedRecord);
 
       this.state[type].data[normalizedRecord.id] = normalizedRecord;
 
@@ -59,7 +42,9 @@ export default class Store {
       if (!option.isBackgroundOperation) {
         this.subscriptions.forEach(subscription => subscription());
       }
-    });
+    } else {
+      throw new Error('Record to set has no ID');
+    }
   }
 
   /**
@@ -70,24 +55,19 @@ export default class Store {
    * @function
    */
   update(type, id, attribute, option = {}) {
-    const cachedRecord = this.getCachedRecord(type, id);
+    const cachedRecord = this.getStateForRecord(type, id);
 
     if (cachedRecord) {
-      const updatedRecord = Object.assign({}, cachedRecord, attribute);
-      const normalizedRecord = normalize(this.model, type, updatedRecord);
+      const modelForType = this.model[type];
+      const updatedRecord = modelForType.deserialize(Object.assign(
+        {},
+        cachedRecord,
+        attribute,
+        { id },
+      ));
 
-      this.state[type].data[id] = normalizedRecord;
-
-      this.syncAddedRelationships(type, updatedRecord);
-      this.syncRemovedRelationships(
-        type,
-        normalizedRecord,
-        normalize(this.model, type, cachedRecord),
-      );
-
-      if (!option.isBackgroundOperation) {
-        this.subscriptions.forEach(subscription => subscription());
-      }
+      this.set(type, updatedRecord, Object.assign({}, option, { isDeserialized: true }));
+      this.syncRemovedRelationships(type, updatedRecord, cachedRecord);
     } else {
       throw new Error('Record doesn\'t exist');
     }
@@ -100,20 +80,15 @@ export default class Store {
    * @function
    */
   delete(type, id, option = {}) {
-    const cachedRecord = this.getCachedRecord(type, id);
+    const cachedRecord = this.getStateForRecord(type, id);
 
     if (cachedRecord) {
+      const modelForType = this.model[type];
+      const defaultRecord = getDefaultRecord(modelForType, type);
+
+      this.update(type, id, defaultRecord, option);
+      this.syncRemovedRelationships(type, defaultRecord, cachedRecord);
       delete this.state[type].data[id];
-
-      this.syncRemovedRelationships(
-        type,
-        getDefaultRecord(this, type),
-        normalize(this.model, type, cachedRecord),
-      );
-
-      if (!option.isBackgroundOperation) {
-        this.subscriptions.forEach(subscription => subscription());
-      }
     } else {
       throw new Error('Record doesn\'t exist');
     }
@@ -127,15 +102,17 @@ export default class Store {
    * @function
    */
   get(type, id, fetch) {
-    if (this.state[type].data[id]) {
-      return denormalize(this, type, id);
+    const cachedRecord = this.getCachedRecord(type, id);
+
+    if (cachedRecord) {
+      return cachedRecord;
     }
 
     if (fetch) {
       return fetch().then((record) => {
-        this.add(type, record, { isBackgroundOperation: true });
+        this.set(type, record, { isBackgroundOperation: true });
 
-        return denormalize(this, type, id);
+        return this.getCachedRecord(type, id);
       });
     }
 
@@ -151,7 +128,7 @@ export default class Store {
   getAll(type, fetch) {
     if (fetch && !this.state[type].isDataComplete) {
       return fetch().then((records) => {
-        this.set(type, records, { isBackgroundOperation: true });
+        records.forEach(record => this.set(type, record, { isBackgroundOperation: true }));
 
         return Object.keys(this.state[type].data).map(id => this.get(type, id));
       });
@@ -170,7 +147,7 @@ export default class Store {
    */
   query(type, fetch) {
     return fetch().then((records) => {
-      records.forEach(record => this.add(type, record, { isBackgroundOperation: true }));
+      records.forEach(record => this.set(type, record, { isBackgroundOperation: true }));
 
       return records.map(record => this.get(type, record.id));
     });
@@ -223,11 +200,52 @@ export default class Store {
   /**
    * @param {string} type
    * @param {string} id
-   * @return {Object} Cached record
+   * @return {Object} State for record
    * @private
    * @function
    */
   getCachedRecord(type, id) {
+    if (this.state[type].data[id]) {
+      const cachedRecord = Object.assign({}, this.state[type].data[id]) || null;
+
+      if (cachedRecord) {
+        const modelForType = this.model[type];
+
+        Object.keys(modelForType.relationship).forEach((relationshipKey) => {
+          const descriptor = modelForType.relationship[relationshipKey];
+
+          if (descriptor.kind === 'belongsTo' && cachedRecord[relationshipKey]) {
+            const belongsToId = cachedRecord[relationshipKey];
+
+            cachedRecord[relationshipKey] = Object.assign(
+              {},
+              this.state[descriptor.type].data[belongsToId],
+            );
+          } else if (descriptor.kind === 'hasMany' && cachedRecord[relationshipKey].length > 0) {
+            cachedRecord[relationshipKey] = cachedRecord[relationshipKey].map(hasManyId => (
+              Object.assign(
+                {},
+                this.state[descriptor.type].data[hasManyId],
+              )
+            ));
+          }
+        });
+      }
+
+      return cachedRecord;
+    }
+
+    return null;
+  }
+
+  /**
+   * @param {string} type
+   * @param {string} id
+   * @return {Object} State for record
+   * @private
+   * @function
+   */
+  getStateForRecord(type, id) {
     return this.state[type].data[id] || null;
   }
 
@@ -244,34 +262,34 @@ export default class Store {
     let recordToSync;
 
     if (typeof record[belongsToAttribute] === 'object' && record[belongsToAttribute] !== null) {
-      recordToSync = record[belongsToAttribute];
+      recordToSync = this.model[descriptor.type].deserialize(record[belongsToAttribute]);
     } else {
       recordToSync = { id: record[belongsToAttribute] };
     }
 
     if (cardinality === 'oneToOne') {
-      const cachedRecord = this.getCachedRecord(descriptor.type, recordToSync.id);
+      const cachedRecord = this.getStateForRecord(descriptor.type, recordToSync.id);
 
       if (!cachedRecord || !cachedRecord[descriptor.inverse]) {
         const newRecord = Object.assign(recordToSync, { [descriptor.inverse]: record.id });
 
-        this.add(descriptor.type, newRecord, { isBackgroundOperation: true });
+        this.set(descriptor.type, newRecord, { isBackgroundOperation: true });
       }
     } else if (cardinality === 'oneToMany') {
-      const cachedRecord = this.getCachedRecord(descriptor.type, recordToSync.id);
+      const cachedRecord = this.getStateForRecord(descriptor.type, recordToSync.id);
 
       if (!cachedRecord) {
         const newRecord = Object.assign(recordToSync, { [descriptor.inverse]: [record.id] });
 
-        this.add(descriptor.type, newRecord, { isBackgroundOperation: true });
+        this.set(descriptor.type, newRecord, { isBackgroundOperation: true });
       } else if (!cachedRecord[descriptor.inverse].find(id => id === record.id)) {
         cachedRecord[descriptor.inverse].push(record.id);
       }
     } else {
-      const cachedRecord = this.getCachedRecord(descriptor.type, recordToSync.id) || {};
+      const cachedRecord = this.getStateForRecord(descriptor.type, recordToSync.id) || {};
       const newRecord = Object.assign(cachedRecord, recordToSync);
 
-      this.add(descriptor.type, newRecord, { isBackgroundOperation: true });
+      this.set(descriptor.type, newRecord, { isBackgroundOperation: true });
     }
   }
 
@@ -292,36 +310,36 @@ export default class Store {
         let recordToSync;
 
         if (typeof item === 'object' && item !== null) {
-          recordToSync = item;
+          recordToSync = this.model[descriptor.type].deserialize(item);
         } else {
           recordToSync = { id: item };
         }
 
         if (cardinality === 'oneToMany') {
-          const cachedRecord = this.getCachedRecord(descriptor.type, recordToSync.id);
+          const cachedRecord = this.getStateForRecord(descriptor.type, recordToSync.id);
 
           if (!cachedRecord) {
             const newRecord = Object.assign(recordToSync, { [descriptor.inverse]: record.id });
 
-            this.add(descriptor.type, newRecord, { isBackgroundOperation: true });
+            this.set(descriptor.type, newRecord, { isBackgroundOperation: true });
           } else {
             cachedRecord[descriptor.inverse] = record.id;
           }
         } else if (cardinality === 'manyToMany') {
-          const cachedRecord = this.getCachedRecord(descriptor.type, recordToSync.id);
+          const cachedRecord = this.getStateForRecord(descriptor.type, recordToSync.id);
 
           if (!cachedRecord) {
             const newRecord = Object.assign(recordToSync, { [descriptor.inverse]: [record.id] });
 
-            this.add(descriptor.type, newRecord, { isBackgroundOperation: true });
+            this.set(descriptor.type, newRecord, { isBackgroundOperation: true });
           } else if (!cachedRecord[descriptor.inverse].find(id => id === record.id)) {
             cachedRecord[descriptor.inverse].push(record.id);
           }
         } else {
-          const cachedRecord = this.getCachedRecord(descriptor.type, recordToSync.id) || {};
+          const cachedRecord = this.getStateForRecord(descriptor.type, recordToSync.id) || {};
           const newRecord = Object.assign(cachedRecord, recordToSync);
 
-          this.add(descriptor.type, newRecord, { isBackgroundOperation: true });
+          this.set(descriptor.type, newRecord, { isBackgroundOperation: true });
         }
       });
     }
@@ -372,19 +390,17 @@ export default class Store {
    * @function
    */
   syncAddedRelationships(type, record) {
-    const { model } = this;
-    const modelForType = model[type];
-    const { relationship: relationshipForType } = modelForType;
+    Object.keys(this.model[type].relationship).forEach((relationshipKey) => {
+      const { kind } = this.model[type].relationship[relationshipKey];
 
-    Object.keys(relationshipForType).forEach((attributeKey) => {
-      if (record[attributeKey]) {
-        if (relationshipForType[attributeKey].kind === 'belongsTo') {
-          this.syncAddedBelongsTo(type, record, attributeKey);
+      if (record[relationshipKey]) {
+        if (kind === 'belongsTo') {
+          this.syncAddedBelongsTo(type, record, relationshipKey);
         } else {
-          this.syncAddedHasMany(type, record, attributeKey);
+          this.syncAddedHasMany(type, record, relationshipKey);
         }
-      } else if (relationshipForType[attributeKey].kind === 'hasMany') {
-        this.syncExistingHasMany(type, record, attributeKey);
+      } else if (kind === 'hasMany') {
+        this.syncExistingHasMany(type, record, relationshipKey);
       }
     });
   }
@@ -416,7 +432,7 @@ export default class Store {
    */
   syncRemovedBelongsToRelationship(type, currentRecord, oldRecord, key, descriptor) {
     if (currentRecord[key] === null && currentRecord[key] !== oldRecord[key]) {
-      const inverseRecord = this.getCachedRecord(descriptor.type, oldRecord[key]);
+      const inverseRecord = this.getStateForRecord(descriptor.type, oldRecord[key]);
 
       if (inverseRecord) {
         const cardinality = getCardinality(this.model, type, key);
@@ -445,7 +461,7 @@ export default class Store {
     const removedRecords = oldRecord[key].filter(record => !currentRecord[key].includes(record));
 
     removedRecords.forEach((removedRecord) => {
-      const inverseRecord = this.getCachedRecord(descriptor.type, removedRecord);
+      const inverseRecord = this.getStateForRecord(descriptor.type, removedRecord);
 
       if (inverseRecord) {
         const cardinality = getCardinality(this.model, type, key);
