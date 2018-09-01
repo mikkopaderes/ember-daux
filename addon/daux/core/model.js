@@ -19,10 +19,10 @@ export default class Model {
 
   /**
    * @param {Object} record
-   * @return {Object} Normalized record
+   * @return {Object} Deserialized record
    * @function
    */
-  static normalize(record) {
-    return record;
+  static deserialize(record) {
+    return Object.assign({}, record);
   }
 }

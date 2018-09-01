@@ -67,18 +67,18 @@ export default class User extends Model {
   }
 
   /**
-   * Optional hook to normalize a record
+   * Optional hook to deserialize a record
    */
-  static normalize(record) {
-    const normalizedRecord = {};
+  static deserialize(record) {
+    const deserializedRecord = {};
 
     Object.keys(record).forEach((key) => {
       const camelizedKey = camelize(key);
 
-      normalizedRecord[camelizedKey] = record[key];
+      deserializedRecord[camelizedKey] = record[key];
     });
 
-    return normalizedRecord;
+    return deserializedRecord;
   }
 }
 ```
@@ -108,6 +108,7 @@ export default Route.extend({
   store: service('store'),
 
   beforeModel() {
+    // Call Route.refresh() whenever a state changes
     this.store.subscribe(() => this.refresh());
   },
 
@@ -136,7 +137,7 @@ export default Controller.extend({
         method: 'POST',
         body: JSON.stringify(newUser)
       }).then(() => {
-        this.store.add('user', newUser);
+        this.store.set('user', newUser);
       });
     }
   }

@@ -132,14 +132,14 @@ class User extends Model {
   /**
    * @override
    */
-  static normalize(record) {
-    const normalizedRecord = Object.assign({}, record);
+  static deserialize(record) {
+    const deserializedRecord = Object.assign({}, record);
 
     if (record.country === 'm0naco') {
-      normalizedRecord.country = 'monaco';
+      deserializedRecord.country = 'monaco';
     }
 
-    return normalizedRecord;
+    return deserializedRecord;
   }
 }
 

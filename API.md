@@ -2,36 +2,183 @@
 
 ## Table of Contents
 
-- [Daux.Core.Store](#dauxcorestore)
+- [Daux.Core.Batch](#dauxcorebatch)
   - [Functions](#functions)
-    - [subscribe](#subscribe)
+    - [commit](#commit)
+    - [delete](#delete)
+    - [set](#set)
+    - [update](#update)
+- [Daux.Core.Model](#dauxcoremodel)
+  - [Static Properties](#static-properties)
+    - [attributes](#attributes)
+    - [relationship](#relationship)
+  - [Static Functions](#static-functions)
+    - [deserialize](#deserialize)
+- [Daux.Core.Store](#dauxcorestore)
+  - [Functions](#functions-1)
+    - [batch](#batch)
+    - [delete](#delete-1)
     - [getAll](#getall)
     - [get](#get)
     - [query](#query)
-    - [set](#set)
-    - [add](#add)
-    - [update](#update)
-    - [delete](#delete)
+    - [set](#set-1)
+    - [subscribe](#subscribe)
+    - [update](#update-1)
+
+## Daux.Core.Batch
+
+### Functions
+
+#### commit
+
+Commits the batched operations
+
+This accepts the following option:
+
+- `isBackgroundOperation` - When true, this won't execute the listeners for the subscribed Routes.
+
+##### Params:
+
+| Name   | Type   | Attributes | Description |
+| -------| -------| ---------- | ------------|
+| option | Object | optional   |             |
+
+### delete
+
+Batch a delete operation
+
+##### Params:
+
+| Name   | Type   | Attributes | Description |
+| -------| -------| ---------- | ------------|
+| type   | string |            |             |
+| id     | string |            |             |
+
+### set
+
+Batch a set operation
+
+##### Params:
+
+| Name    | Type   | Attributes | Description |
+| --------| ------ | ---------- | ------------|
+| type    | string |            |             |
+| record  | Object |            |             |
+
+### update
+
+Batch an update operation
+
+##### Params:
+
+| Name   | Type   | Attributes | Description |
+| -------| -------| ---------- | ------------|
+| type   | string |            |             |
+| id     | string |            |             |
+| record | Object |            |             |
+
+## Daux.Core.Model
+
+### Static Properties
+
+#### attributes
+
+Override this and return the attribute (non-relationship) names for a model
+
+##### Returns:
+
+Array of attribute names
+
+Type: Array
+
+#### relationship
+
+Override this and return the relationship descriptor for a model
+
+e.g.
+
+```javascript
+static get relationship() {
+  return {
+    country: {
+      type: 'country',
+      kind: 'belongsTo',
+      inverse: null,
+    },
+    posts: {
+      type: 'post',
+      kind: 'hasMany',
+      inverse: 'author',
+    }
+  };
+}
+```
+
+##### Returns:
+
+Object containing the relationship descriptors
+
+Type: Object
+
+### Static Functions
+
+#### deserialize
+
+Override this hook to deserialize your response if necessary
+
+##### Params:
+
+| Name   | Type   | Attributes | Description |
+| -------| -------| ---------- | ------------|
+| record | Object |            |             |
+
+##### Returns:
+
+Deserialized record
+
+Type: Object
 
 ## Daux.Core.Store
 
 ### Functions
 
-#### subscribe
+#### batch
 
-Subscribes for any changes in the state.
+Returns a `Daux.Core.Batch` class used for batching operations.
 
-##### Params:
+This is for the case where you want to update the state multiple times sequentially while just triggering the listeners for the subscribed Routes **once**.
 
-| Name     | Type        | Attributes | Description |
-| -------- | ----------- | ---------- | ------------|
-| callback | callback    |            |             |
+e.g.
+
+```javascript
+const batch = store.batch();
+
+batch.update('user', 'user_a', { name: 'Foo' });
+batch.delete('user', 'user_b');
+batch.commit();
+```
 
 ##### Returns:
 
-Function that you can call to unsubscribe from changes.
+Instance of the `Daux.Core.Batch`
 
-Type: Function
+Type: `Daux.Core.Batch`
+
+#### delete
+
+Deletes a record for a type.
+
+This accepts the following option:
+
+- `isBackgroundOperation` - When true, this won't execute the listeners for the subscribed Routes.
+
+##### Params:
+
+| Name   | Type   | Attributes | Description |
+| -------| -------| ---------- | ------------|
+| type   | string |            |             |
+| id     | string |            |             |
+| option | Object | optional   |             |
 
 #### getAll
 
@@ -97,7 +244,7 @@ Type: Promise
 
 #### set
 
-Sets (overwrites completely) the records for a type.
+Sets a record for a type.
 
 This accepts the following option:
 
@@ -105,27 +252,27 @@ This accepts the following option:
 
 ##### Params:
 
-| Name    | Type           | Attributes | Description |
-| --------| -------------- | ---------- | ------------|
-| type    | string         |            |             |
-| records | Array.<Object> |            |             |
-| option  | Object         | optional   |             |
+| Name    | Type   | Attributes | Description |
+| --------| ------ | ---------- | ------------|
+| type    | string |            |             |
+| record  | Object |            |             |
+| option  | Object | optional   |             |
 
-#### add
+#### subscribe
 
-Adds a record for a type.
-
-This accepts the following option:
-
-- `isBackgroundOperation` - When true, this won't execute the listeners for the subscribed Routes.
+Subscribes for any changes in the state.
 
 ##### Params:
 
-| Name   | Type    | Attributes | Description |
-| -------| ------- | ---------- | ------------|
-| type   | string  |            |             |
-| record | Object  |            |             |
-| option | Object  | optional   |             |
+| Name     | Type        | Attributes | Description |
+| -------- | ----------- | ---------- | ------------|
+| callback | callback    |            |             |
+
+##### Returns:
+
+Function that you can call to unsubscribe from changes.
+
+Type: Function
 
 #### update
 
@@ -143,51 +290,3 @@ This accepts the following option:
 | id     | string |            |             |
 | record | Object |            |             |
 | option | Object | optional   |             |
-
-#### delete
-
-Deletes a record for a type.
-
-This accepts the following option:
-
-- `isBackgroundOperation` - When true, this won't execute the listeners for the subscribed Routes.
-
-##### Params:
-
-| Name   | Type   | Attributes | Description |
-| -------| -------| ---------- | ------------|
-| type   | string |            |             |
-| id     | string |            |             |
-| option | Object | optional   |             |
-
-#### batch
-
-Returns a `Batch` class used for batching operations.
-
-This is for the case where you want to update the state multiple times sequentially while just triggering the listeners for the subscribed Routes **once**.
-
-This exposes the following functions:
-
-- `batch.set(type, records)`
-- `batch.add(type, record)`
-- `batch.update(type, id, attribute)`
-- `batch.delete(type, id)`
-- `batch.commit(option)`
-  - Accepts the following option:
-    - `isBackgroundOperation` - When true, this won't execute the listeners for the subscribed Routes.
-
-e.g.
-
-```javascript
-const batch = store.batch();
-
-batch.update('user', 'user_a', { name: 'Foo' });
-batch.delete('user', 'user_b');
-batch.commit();
-```
-
-##### Returns:
-
-Instance of the `Batch`
-
-Type: `Daux.Core.Batch`
