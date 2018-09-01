@@ -37,7 +37,7 @@ export default class Store {
 
       this.state[type].data[normalizedRecord.id] = normalizedRecord;
 
-      this.syncAddedRelationships(type, record);
+      this.syncAddedRelationships(type, deserializedRecord);
 
       if (!option.isBackgroundOperation) {
         this.subscriptions.forEach(subscription => subscription());
@@ -213,7 +213,7 @@ export default class Store {
    */
   getCachedRecord(type, id) {
     if (this.state[type].data[id]) {
-      const cachedRecord = Object.assign({}, this.state[type].data[id]) || null;
+      const cachedRecord = Object.assign({}, this.state[type].data[id]);
 
       if (cachedRecord) {
         const modelForType = this.model[type];

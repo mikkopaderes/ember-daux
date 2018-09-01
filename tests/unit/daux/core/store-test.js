@@ -90,7 +90,7 @@ module('Unit | Core | store', function () {
       id: 'user_a',
       name: 'User A',
       blockedUsers: ['user_b'],
-      country: 'monaco',
+      country: 'm0naco',
       groups: ['group_a'],
       posts: ['post_a'],
       username: 'username_a',
