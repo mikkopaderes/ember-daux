@@ -207,37 +207,48 @@ export default class Store {
   /**
    * @param {string} type
    * @param {string} id
+   * @param {number} [nestLevel=0]
    * @return {Object} State for record
    * @private
    * @function
    */
-  getCachedRecord(type, id) {
+  getCachedRecord(type, id, nestLevel = 0) {
     if (this.state[type].data[id]) {
       const cachedRecord = Object.assign({}, this.state[type].data[id]);
+      const modelForType = this.model[type];
 
-      if (cachedRecord) {
-        const modelForType = this.model[type];
+      Object.keys(modelForType.relationship).forEach((relationshipKey) => {
+        const descriptor = modelForType.relationship[relationshipKey];
 
-        Object.keys(modelForType.relationship).forEach((relationshipKey) => {
-          const descriptor = modelForType.relationship[relationshipKey];
+        if (descriptor.kind === 'belongsTo' && cachedRecord[relationshipKey]) {
+          const belongsToId = cachedRecord[relationshipKey];
 
-          if (descriptor.kind === 'belongsTo' && cachedRecord[relationshipKey]) {
-            const belongsToId = cachedRecord[relationshipKey];
-
+          if (nestLevel < 1) {
+            cachedRecord[relationshipKey] = this.getCachedRecord(
+              descriptor.type,
+              belongsToId,
+              nestLevel + 1,
+            );
+          } else {
             cachedRecord[relationshipKey] = Object.assign(
               {},
               this.state[descriptor.type].data[belongsToId],
             );
-          } else if (descriptor.kind === 'hasMany' && cachedRecord[relationshipKey].length > 0) {
-            cachedRecord[relationshipKey] = cachedRecord[relationshipKey].map(hasManyId => (
-              Object.assign(
-                {},
-                this.state[descriptor.type].data[hasManyId],
-              )
-            ));
           }
-        });
-      }
+        } else if (descriptor.kind === 'hasMany' && cachedRecord[relationshipKey].length > 0) {
+          cachedRecord[relationshipKey] = cachedRecord[relationshipKey].map((hasManyId) => {
+            if (nestLevel < 1) {
+              return this.getCachedRecord(
+                descriptor.type,
+                hasManyId,
+                nestLevel + 1,
+              );
+            }
+
+            return Object.assign({}, this.state[descriptor.type].data[hasManyId]);
+          });
+        }
+      });
 
       return cachedRecord;
     }

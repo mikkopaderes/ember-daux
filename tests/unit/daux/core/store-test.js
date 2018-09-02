@@ -73,9 +73,50 @@ module('Unit | Core | store', function () {
         },
       ],
       country: { id: 'monaco', name: 'Monaco' },
-      groups: [{ id: 'group_a', name: 'Group A', members: ['user_a'] }],
-      posts: [{ id: 'post_a', message: 'Post A', author: 'user_a' }],
-      username: { id: 'username_a', user: 'user_a' },
+      groups: [
+        {
+          id: 'group_a',
+          name: 'Group A',
+          members: [
+            {
+              id: 'user_a',
+              name: 'User A',
+              blockedUsers: ['user_b'],
+              country: 'monaco',
+              groups: ['group_a'],
+              posts: ['post_a'],
+              username: 'username_a',
+            },
+          ],
+        },
+      ],
+      posts: [
+        {
+          id: 'post_a',
+          message: 'Post A',
+          author: {
+            id: 'user_a',
+            name: 'User A',
+            blockedUsers: ['user_b'],
+            country: 'monaco',
+            groups: ['group_a'],
+            posts: ['post_a'],
+            username: 'username_a',
+          },
+        },
+      ],
+      username: {
+        id: 'username_a',
+        user: {
+          id: 'user_a',
+          name: 'User A',
+          blockedUsers: ['user_b'],
+          country: 'monaco',
+          groups: ['group_a'],
+          posts: ['post_a'],
+          username: 'username_a',
+        },
+      },
     });
   });
 
@@ -112,9 +153,50 @@ module('Unit | Core | store', function () {
         },
       ],
       country: { id: 'monaco', name: null },
-      groups: [{ id: 'group_a', name: null, members: ['user_a'] }],
-      posts: [{ id: 'post_a', message: null, author: 'user_a' }],
-      username: { id: 'username_a', user: 'user_a' },
+      groups: [
+        {
+          id: 'group_a',
+          name: null,
+          members: [
+            {
+              id: 'user_a',
+              name: 'User A',
+              blockedUsers: ['user_b'],
+              country: 'monaco',
+              groups: ['group_a'],
+              posts: ['post_a'],
+              username: 'username_a',
+            },
+          ],
+        },
+      ],
+      posts: [
+        {
+          id: 'post_a',
+          message: null,
+          author: {
+            id: 'user_a',
+            name: 'User A',
+            blockedUsers: ['user_b'],
+            country: 'monaco',
+            groups: ['group_a'],
+            posts: ['post_a'],
+            username: 'username_a',
+          },
+        },
+      ],
+      username: {
+        id: 'username_a',
+        user: {
+          id: 'user_a',
+          name: 'User A',
+          blockedUsers: ['user_b'],
+          country: 'monaco',
+          groups: ['group_a'],
+          posts: ['post_a'],
+          username: 'username_a',
+        },
+      },
     });
   });
 
@@ -156,7 +238,18 @@ module('Unit | Core | store', function () {
       country: null,
       groups: [],
       posts: [],
-      username: { id: 'username_a', user: 'user_a' },
+      username: {
+        id: 'username_a',
+        user: {
+          id: 'user_a',
+          name: 'User A',
+          blockedUsers: [],
+          country: null,
+          groups: [],
+          posts: [],
+          username: 'username_a',
+        },
+      },
     });
     assert.equal(store.get('username', 'username_a').user.id, 'user_a');
   });
@@ -183,7 +276,21 @@ module('Unit | Core | store', function () {
       blockedUsers: [],
       country: null,
       groups: [],
-      posts: [{ id: 'post_a', message: null, author: 'user_a' }],
+      posts: [
+        {
+          id: 'post_a',
+          message: null,
+          author: {
+            id: 'user_a',
+            name: 'User A',
+            blockedUsers: [],
+            country: null,
+            groups: [],
+            posts: ['post_a'],
+            username: null,
+          },
+        },
+      ],
       username: null,
     });
     assert.equal(store.get('post', 'post_a').author.id, 'user_a');
@@ -210,7 +317,23 @@ module('Unit | Core | store', function () {
       name: 'User A',
       blockedUsers: [],
       country: null,
-      groups: [{ id: 'group_a', name: null, members: ['user_a'] }],
+      groups: [
+        {
+          id: 'group_a',
+          name: null,
+          members: [
+            {
+              id: 'user_a',
+              name: 'User A',
+              blockedUsers: [],
+              country: null,
+              groups: ['group_a'],
+              posts: [],
+              username: null,
+            },
+          ],
+        },
+      ],
       posts: [],
       username: null,
     });
