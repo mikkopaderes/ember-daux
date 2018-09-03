@@ -318,7 +318,7 @@ export default class Store {
 
     if (descriptor.kind === 'belongsTo') {
       this.set(descriptor.type, includedData, { isBackgroundOperation: true });
-      this.update(type, record.id, { [key]: includedData.id });
+      this.update(type, record.id, { [key]: includedData.id }, { isBackgroundOperation: true });
     } else {
       includedData.forEach(data => (
         this.set(descriptor.type, data, { isBackgroundOperation: true })
@@ -326,7 +326,9 @@ export default class Store {
 
       const includedDataIds = includedData.map(data => data.id);
 
-      this.update(type, record.id, { [key]: [...record[key], ...includedDataIds] });
+      this.update(type, record.id, {
+        [key]: [...record[key], ...includedDataIds],
+      }, { isBackgroundOperation: true });
     }
   }
 
