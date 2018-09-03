@@ -257,7 +257,7 @@ this.store.get('user', 'user_a', {
 
 When `option.fetch()` is unavailable, this'll resolve with the cached records in the store. Otherwise, this'll resolves to whatever gets resolved in `option.fetch()`.
 
-`option.fetch()` and the includes will be skipped even when passed-in if the record has already cached.
+`option.fetch()` and the includes will be skipped even when passed-in if the record has already been cached.
 
 ##### Params:
 
