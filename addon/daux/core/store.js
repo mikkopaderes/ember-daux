@@ -109,13 +109,7 @@ export default class Store {
    * @function
    */
   get(type, id, fetch) {
-    const cachedRecord = this.getCachedRecord(type, id);
-
-    if (cachedRecord) {
-      return cachedRecord;
-    }
-
-    if (fetch) {
+    if (!this.isRecordAttributePopulated(type, id) && fetch) {
       return fetch().then((record) => {
         this.set(type, record, { isBackgroundOperation: true });
 
@@ -123,7 +117,7 @@ export default class Store {
       });
     }
 
-    return null;
+    return this.getCachedRecord(type, id);
   }
 
   /**
@@ -265,6 +259,35 @@ export default class Store {
    */
   getStateForRecord(type, id) {
     return this.state[type].data[id] || null;
+  }
+
+  /**
+   * @param {string} type
+   * @param {string} id
+   * @return {boolean} True if populated. Otherwise, false.
+   * @private
+   * @function
+   */
+  isRecordAttributePopulated(type, id) {
+    const currentRecordState = this.getStateForRecord(type, id);
+
+    if (currentRecordState) {
+      const { attributes } = this.model[type];
+      const populatedAttribute = attributes.find((key) => {
+        if (
+          currentRecordState[key] === null
+          || (Array.isArray(currentRecordState[key]) && currentRecordState[key].length === 0)
+        ) {
+          return false;
+        }
+
+        return true;
+      });
+
+      return populatedAttribute;
+    }
+
+    return false;
   }
 
   /**

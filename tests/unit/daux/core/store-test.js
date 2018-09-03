@@ -631,13 +631,54 @@ module('Unit | Core | store', function () {
     assert.ok(result instanceof Batch);
   });
 
-  test('should call set when getting a record using a promise', async function (assert) {
+  test('should get record for a model type using cache', function (assert) {
+    assert.expect(1);
+
+    // Arrange
+    const user = { id: 'user_a', name: 'User A' };
+    const store = new Store(model);
+
+    store.set('user', user);
+
+    // Act
+    const result = store.get('user', 'user_a');
+
+    // Assert
+    assert.deepEqual(result, {
+      id: 'user_a',
+      name: 'User A',
+      blockedUsers: [],
+      country: null,
+      groups: [],
+      posts: [],
+      username: null,
+    });
+  });
+
+  test('should call set when getting a non-cached record using a promise', async function (assert) {
     assert.expect(1);
 
     // Arrange
     const user = { id: 'user_a', name: 'User A' };
     const store = new Store(model);
     const setSpy = sinon.spy(store, 'set');
+
+    // Act
+    await store.get('user', 'user_a', () => Promise.resolve(user));
+
+    // Assert
+    assert.ok(setSpy.calledWithExactly('user', user, { isBackgroundOperation: true }));
+  });
+
+  test('should call set when getting a cached but unpopulated record using a promise', async function (assert) {
+    assert.expect(1);
+
+    // Arrange
+    const user = { id: 'user_a', name: 'User A' };
+    const store = new Store(model);
+    const setSpy = sinon.spy(store, 'set');
+
+    store.set('user', { id: 'user_a', country: 'monaco' });
 
     // Act
     await store.get('user', 'user_a', () => Promise.resolve(user));
