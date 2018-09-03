@@ -9,7 +9,7 @@ import model from '../../../helpers/model';
 module('Unit | Core | store', function () {
   QUnit.dump.maxDepth = 10;
 
-  test('should set record without relationship', function (assert) {
+  test('should set record without relationship', async function (assert) {
     assert.expect(1);
 
     // Arrange
@@ -19,7 +19,7 @@ module('Unit | Core | store', function () {
     store.set('user', { id: 'user_a', name: 'User A' });
 
     // Assert
-    assert.deepEqual(store.get('user', 'user_a'), {
+    assert.deepEqual(await store.get('user', 'user_a'), {
       id: 'user_a',
       name: 'User A',
       blockedUsers: [],
@@ -30,7 +30,7 @@ module('Unit | Core | store', function () {
     });
   });
 
-  test('should set record with embedded relationship', function (assert) {
+  test('should set record with embedded relationship', async function (assert) {
     assert.expect(1);
 
     // Arrange
@@ -58,7 +58,7 @@ module('Unit | Core | store', function () {
     });
 
     // Assert
-    assert.deepEqual(store.get('user', 'user_a'), {
+    assert.deepEqual(await store.get('user', 'user_a'), {
       id: 'user_a',
       name: 'User A',
       blockedUsers: [
@@ -120,7 +120,7 @@ module('Unit | Core | store', function () {
     });
   });
 
-  test('should set record with non-embedded relationship', function (assert) {
+  test('should set record with non-embedded relationship', async function (assert) {
     assert.expect(1);
 
     // Arrange
@@ -138,7 +138,7 @@ module('Unit | Core | store', function () {
     });
 
     // Assert
-    assert.deepEqual(store.get('user', 'user_a'), {
+    assert.deepEqual(await store.get('user', 'user_a'), {
       id: 'user_a',
       name: 'User A',
       blockedUsers: [
@@ -215,7 +215,7 @@ module('Unit | Core | store', function () {
     }
   });
 
-  test('should sync new one-to-one relationship when setting record', function (assert) {
+  test('should sync new one-to-one relationship when setting record', async function (assert) {
     assert.expect(2);
 
     // Arrange
@@ -231,7 +231,7 @@ module('Unit | Core | store', function () {
     });
 
     // Assert
-    assert.deepEqual(store.get('user', 'user_a'), {
+    assert.deepEqual(await store.get('user', 'user_a'), {
       id: 'user_a',
       name: 'User A',
       blockedUsers: [],
@@ -251,10 +251,13 @@ module('Unit | Core | store', function () {
         },
       },
     });
-    assert.equal(store.get('username', 'username_a').user.id, 'user_a');
+
+    const username = await store.get('username', 'username_a');
+
+    assert.equal(username.user.id, 'user_a');
   });
 
-  test('should sync new one-to-many relationship when setting record', function (assert) {
+  test('should sync new one-to-many relationship when setting record', async function (assert) {
     assert.expect(2);
 
     // Arrange
@@ -270,7 +273,7 @@ module('Unit | Core | store', function () {
     });
 
     // Assert
-    assert.deepEqual(store.get('user', 'user_a'), {
+    assert.deepEqual(await store.get('user', 'user_a'), {
       id: 'user_a',
       name: 'User A',
       blockedUsers: [],
@@ -293,10 +296,13 @@ module('Unit | Core | store', function () {
       ],
       username: null,
     });
-    assert.equal(store.get('post', 'post_a').author.id, 'user_a');
+
+    const post = await store.get('post', 'post_a');
+
+    assert.equal(post.author.id, 'user_a');
   });
 
-  test('should sync new many-to-many relationship when setting record', function (assert) {
+  test('should sync new many-to-many relationship when setting record', async function (assert) {
     assert.expect(2);
 
     // Arrange
@@ -312,7 +318,7 @@ module('Unit | Core | store', function () {
     });
 
     // Assert
-    assert.deepEqual(store.get('user', 'user_a'), {
+    assert.deepEqual(await store.get('user', 'user_a'), {
       id: 'user_a',
       name: 'User A',
       blockedUsers: [],
@@ -337,7 +343,10 @@ module('Unit | Core | store', function () {
       posts: [],
       username: null,
     });
-    assert.equal(store.get('group', 'group_a').members[0].id, 'user_a');
+
+    const group = await store.get('group', 'group_a');
+
+    assert.equal(group.members[0].id, 'user_a');
   });
 
   test('should trigger subscription when setting record', function (assert) {
@@ -411,7 +420,7 @@ module('Unit | Core | store', function () {
     }
   });
 
-  test('should sync removed one-to-one relationship when updating record', function (assert) {
+  test('should sync removed one-to-one relationship when updating record', async function (assert) {
     assert.expect(2);
 
     // Arrange
@@ -427,7 +436,7 @@ module('Unit | Core | store', function () {
     store.update('user', 'user_a', { username: null });
 
     // Assert
-    assert.deepEqual(store.get('user', 'user_a'), {
+    assert.deepEqual(await store.get('user', 'user_a'), {
       id: 'user_a',
       name: 'User A',
       blockedUsers: [],
@@ -436,10 +445,10 @@ module('Unit | Core | store', function () {
       posts: [],
       username: null,
     });
-    assert.equal(store.get('username', 'username_a').user, null);
+    assert.equal(await store.get('username', 'username_a').user, null);
   });
 
-  test('should sync removed one-to-many relationship when setting record', function (assert) {
+  test('should sync removed one-to-many relationship when setting record', async function (assert) {
     assert.expect(2);
 
     // Arrange
@@ -455,7 +464,7 @@ module('Unit | Core | store', function () {
     store.update('user', 'user_a', { posts: [] });
 
     // Assert
-    assert.deepEqual(store.get('user', 'user_a'), {
+    assert.deepEqual(await store.get('user', 'user_a'), {
       id: 'user_a',
       name: 'User A',
       blockedUsers: [],
@@ -464,10 +473,13 @@ module('Unit | Core | store', function () {
       posts: [],
       username: null,
     });
-    assert.equal(store.get('post', 'post_a').author, null);
+
+    const post = await store.get('post', 'post_a');
+
+    assert.equal(post.author, null);
   });
 
-  test('should sync removed many-to-many relationship when setting record', function (assert) {
+  test('should sync removed many-to-many relationship when setting record', async function (assert) {
     assert.expect(2);
 
     // Arrange
@@ -483,7 +495,7 @@ module('Unit | Core | store', function () {
     store.update('user', 'user_a', { groups: [] });
 
     // Assert
-    assert.deepEqual(store.get('user', 'user_a'), {
+    assert.deepEqual(await store.get('user', 'user_a'), {
       id: 'user_a',
       name: 'User A',
       blockedUsers: [],
@@ -492,7 +504,10 @@ module('Unit | Core | store', function () {
       posts: [],
       username: null,
     });
-    assert.deepEqual(store.get('group', 'group_a').members, []);
+
+    const group = await store.get('group', 'group_a');
+
+    assert.deepEqual(group.members, []);
   });
 
   test('should trigger subscription when updating record', function (assert) {
@@ -552,7 +567,7 @@ module('Unit | Core | store', function () {
     }, { isBackgroundOperation: true }));
   });
 
-  test('should delete a record for a model type', function (assert) {
+  test('should delete a record for a model type', async function (assert) {
     assert.expect(1);
 
     // Arrange
@@ -564,7 +579,7 @@ module('Unit | Core | store', function () {
     store.delete('user', 'user_a');
 
     // Assert
-    assert.equal(store.get('user', 'user_a'), null);
+    assert.equal(await store.get('user', 'user_a'), null);
   });
 
   test('should trigger subscription when deleting record', function (assert) {
@@ -631,19 +646,21 @@ module('Unit | Core | store', function () {
     assert.ok(result instanceof Batch);
   });
 
-  test('should get record for a model type using cache', function (assert) {
-    assert.expect(1);
+  test('should get record for a model type using cache', async function (assert) {
+    assert.expect(2);
 
     // Arrange
     const user = { id: 'user_a', name: 'User A' };
     const store = new Store(model);
+    const fetchStub = sinon.stub();
 
     store.set('user', user);
 
     // Act
-    const result = store.get('user', 'user_a');
+    const result = await store.get('user', 'user_a', { fetch: fetchStub });
 
     // Assert
+    assert.ok(fetchStub.notCalled);
     assert.deepEqual(result, {
       id: 'user_a',
       name: 'User A',
@@ -664,7 +681,11 @@ module('Unit | Core | store', function () {
     const setSpy = sinon.spy(store, 'set');
 
     // Act
-    await store.get('user', 'user_a', () => Promise.resolve(user));
+    await store.get('user', 'user_a', {
+      fetch() {
+        return Promise.resolve(user);
+      },
+    });
 
     // Assert
     assert.ok(setSpy.calledWithExactly('user', user, { isBackgroundOperation: true }));
@@ -681,7 +702,11 @@ module('Unit | Core | store', function () {
     store.set('user', { id: 'user_a', country: 'monaco' });
 
     // Act
-    await store.get('user', 'user_a', () => Promise.resolve(user));
+    await store.get('user', 'user_a', {
+      fetch() {
+        return Promise.resolve(user);
+      },
+    });
 
     // Assert
     assert.ok(setSpy.calledWithExactly('user', user, { isBackgroundOperation: true }));
@@ -695,7 +720,11 @@ module('Unit | Core | store', function () {
     const store = new Store(model);
 
     // Act
-    const result = await store.get('user', 'user_a', () => Promise.resolve(user));
+    const result = await store.get('user', 'user_a', {
+      fetch() {
+        return Promise.resolve(user);
+      },
+    });
 
     // Assert
     assert.deepEqual(result, {
@@ -709,6 +738,105 @@ module('Unit | Core | store', function () {
     });
   });
 
+  test('should get record for a model type while including it\'s relationships using a promise', async function (assert) {
+    assert.expect(1);
+
+    // Arrange
+    const user = { id: 'user_a', name: 'User A' };
+    const store = new Store(model);
+
+    // Act
+    const result = await store.get('user', 'user_a', {
+      fetch() {
+        return Promise.resolve(user);
+      },
+
+      include: {
+        blockedUsers() {
+          return Promise.resolve([{ id: 'user_b', name: 'User B' }]);
+        },
+
+        country() {
+          return Promise.resolve({ id: 'monaco', name: 'Monaco' });
+        },
+
+        groups() {
+          return Promise.resolve([{ id: 'group_a', name: 'Group A' }]);
+        },
+
+        posts() {
+          return Promise.resolve([{ id: 'post_a', message: 'Post A' }]);
+        },
+
+        username() {
+          return Promise.resolve({ id: 'username_a' });
+        },
+      },
+    });
+
+    // Assert
+    assert.deepEqual(result, {
+      id: 'user_a',
+      name: 'User A',
+      blockedUsers: [
+        {
+          id: 'user_b',
+          name: 'User B',
+          blockedUsers: [],
+          country: null,
+          groups: [],
+          posts: [],
+          username: null,
+        },
+      ],
+      country: { id: 'monaco', name: 'Monaco' },
+      groups: [
+        {
+          id: 'group_a',
+          name: 'Group A',
+          members: [
+            {
+              id: 'user_a',
+              name: 'User A',
+              blockedUsers: ['user_b'],
+              country: 'monaco',
+              groups: ['group_a'],
+              posts: ['post_a'],
+              username: 'username_a',
+            },
+          ],
+        },
+      ],
+      posts: [
+        {
+          id: 'post_a',
+          message: 'Post A',
+          author: {
+            id: 'user_a',
+            name: 'User A',
+            blockedUsers: ['user_b'],
+            country: 'monaco',
+            groups: ['group_a'],
+            posts: ['post_a'],
+            username: 'username_a',
+          },
+        },
+      ],
+      username: {
+        id: 'username_a',
+        user: {
+          id: 'user_a',
+          name: 'User A',
+          blockedUsers: ['user_b'],
+          country: 'monaco',
+          groups: ['group_a'],
+          posts: ['post_a'],
+          username: 'username_a',
+        },
+      },
+    });
+  });
+
   test('should call set per every record when getting all for a model type using a promise', async function (assert) {
     assert.expect(2);
 
@@ -718,7 +846,11 @@ module('Unit | Core | store', function () {
     const setSpy = sinon.spy(store, 'set');
 
     // Act
-    await store.getAll('user', () => Promise.resolve(users));
+    await store.getAll('user', {
+      fetch() {
+        return Promise.resolve(users);
+      },
+    });
 
     // Assert
     assert.ok(setSpy.firstCall.calledWithExactly('user', users[0], {
@@ -729,6 +861,26 @@ module('Unit | Core | store', function () {
     }));
   });
 
+  test('should call get per every record when getting all for a model type using a promise', async function (assert) {
+    assert.expect(2);
+
+    // Arrange
+    const users = [{ id: 'user_a', name: 'User A' }, { id: 'user_b', name: 'User B' }];
+    const store = new Store(model);
+    const getStub = sinon.stub(store, 'get');
+
+    // Act
+    await store.getAll('user', {
+      fetch() {
+        return Promise.resolve(users);
+      },
+    });
+
+    // Assert
+    assert.ok(getStub.firstCall.calledWithExactly('user', 'user_a'));
+    assert.ok(getStub.secondCall.calledWithExactly('user', 'user_b'));
+  });
+
   test('should get all record for a model type using a promise', async function (assert) {
     assert.expect(1);
 
@@ -737,7 +889,11 @@ module('Unit | Core | store', function () {
     const store = new Store(model);
 
     // Act
-    const result = await store.getAll('user', () => Promise.resolve(users));
+    const result = await store.getAll('user', {
+      fetch() {
+        return Promise.resolve(users);
+      },
+    });
 
     // Assert
     assert.deepEqual(result, [
@@ -762,6 +918,49 @@ module('Unit | Core | store', function () {
     ]);
   });
 
+  test('should get all record for a model type while including relationships using a promise', async function (assert) {
+    assert.expect(1);
+
+    // Arrange
+    const users = [{ id: 'user_a', name: 'User A' }, { id: 'user_b', name: 'User B' }];
+    const store = new Store(model);
+
+    // Act
+    const result = await store.getAll('user', {
+      fetch() {
+        return Promise.resolve(users);
+      },
+
+      include: {
+        country() {
+          return Promise.resolve({ id: 'monaco', name: 'Monaco' });
+        },
+      },
+    });
+
+    // Assert
+    assert.deepEqual(result, [
+      {
+        id: 'user_a',
+        name: 'User A',
+        blockedUsers: [],
+        country: { id: 'monaco', name: 'Monaco' },
+        groups: [],
+        posts: [],
+        username: null,
+      },
+      {
+        id: 'user_b',
+        name: 'User B',
+        blockedUsers: [],
+        country: { id: 'monaco', name: 'Monaco' },
+        groups: [],
+        posts: [],
+        username: null,
+      },
+    ]);
+  });
+
   test('should call set per every record when querying for a model type using a promise', async function (assert) {
     assert.expect(2);
 
@@ -771,7 +970,11 @@ module('Unit | Core | store', function () {
     const setSpy = sinon.spy(store, 'set');
 
     // Act
-    await store.query('user', () => Promise.resolve(users));
+    await store.query('user', {
+      fetch() {
+        return Promise.resolve(users);
+      },
+    });
 
     // Assert
     assert.ok(setSpy.firstCall.calledWithExactly('user', users[0], {
@@ -782,6 +985,26 @@ module('Unit | Core | store', function () {
     }));
   });
 
+  test('should call get per every record when querying for a model type using a promise', async function (assert) {
+    assert.expect(2);
+
+    // Arrange
+    const users = [{ id: 'user_a', name: 'User A' }, { id: 'user_b', name: 'User B' }];
+    const store = new Store(model);
+    const getStub = sinon.stub(store, 'get');
+
+    // Act
+    await store.query('user', {
+      fetch() {
+        return Promise.resolve(users);
+      },
+    });
+
+    // Assert
+    assert.ok(getStub.firstCall.calledWithExactly('user', 'user_a'));
+    assert.ok(getStub.secondCall.calledWithExactly('user', 'user_b'));
+  });
+
   test('should query records for a model type using a promise', async function (assert) {
     assert.expect(1);
 
@@ -790,7 +1013,11 @@ module('Unit | Core | store', function () {
     const store = new Store(model);
 
     // Act
-    const result = await store.query('user', () => Promise.resolve(users));
+    const result = await store.query('user', {
+      fetch() {
+        return Promise.resolve(users);
+      },
+    });
 
     // Assert
     assert.deepEqual(result, [
@@ -808,6 +1035,49 @@ module('Unit | Core | store', function () {
         name: 'User B',
         blockedUsers: [],
         country: null,
+        groups: [],
+        posts: [],
+        username: null,
+      },
+    ]);
+  });
+
+  test('should query records for a model type while including relationships using a promise', async function (assert) {
+    assert.expect(1);
+
+    // Arrange
+    const users = [{ id: 'user_a', name: 'User A' }, { id: 'user_b', name: 'User B' }];
+    const store = new Store(model);
+
+    // Act
+    const result = await store.query('user', {
+      fetch() {
+        return Promise.resolve(users);
+      },
+
+      include: {
+        country() {
+          return Promise.resolve({ id: 'monaco', name: 'Monaco' });
+        },
+      },
+    });
+
+    // Assert
+    assert.deepEqual(result, [
+      {
+        id: 'user_a',
+        name: 'User A',
+        blockedUsers: [],
+        country: { id: 'monaco', name: 'Monaco' },
+        groups: [],
+        posts: [],
+        username: null,
+      },
+      {
+        id: 'user_b',
+        name: 'User B',
+        blockedUsers: [],
+        country: { id: 'monaco', name: 'Monaco' },
         groups: [],
         posts: [],
         username: null,

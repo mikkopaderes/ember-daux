@@ -40,7 +40,7 @@ This accepts the following option:
 ##### Params:
 
 | Name   | Type   | Attributes | Description |
-| -------| -------| ---------- | ------------|
+| -------| -------| ---------- | ----------- |
 | option | Object | optional   |             |
 
 ### delete
@@ -50,7 +50,7 @@ Batch a delete operation
 ##### Params:
 
 | Name   | Type   | Attributes | Description |
-| -------| -------| ---------- | ------------|
+| -------| -------| ---------- | ----------- |
 | type   | string |            |             |
 | id     | string |            |             |
 
@@ -61,7 +61,7 @@ Batch a set operation
 ##### Params:
 
 | Name    | Type   | Attributes | Description |
-| --------| ------ | ---------- | ------------|
+| --------| ------ | ---------- | ----------- |
 | type    | string |            |             |
 | record  | Object |            |             |
 
@@ -72,7 +72,7 @@ Batch an update operation
 ##### Params:
 
 | Name   | Type   | Attributes | Description |
-| -------| -------| ---------- | ------------|
+| -------| -------| ---------- | ----------- |
 | type   | string |            |             |
 | id     | string |            |             |
 | record | Object |            |             |
@@ -129,7 +129,7 @@ Override this hook to deserialize your response if necessary
 ##### Params:
 
 | Name   | Type   | Attributes | Description |
-| -------| -------| ---------- | ------------|
+| -------| -------| ---------- | ----------- |
 | record | Object |            |             |
 
 ##### Returns:
@@ -175,7 +175,7 @@ This accepts the following option:
 ##### Params:
 
 | Name   | Type   | Attributes | Description |
-| -------| -------| ---------- | ------------|
+| -------| -------| ---------- | ----------- |
 | type   | string |            |             |
 | id     | string |            |             |
 | option | Object | optional   |             |
@@ -184,9 +184,34 @@ This accepts the following option:
 
 Gets all the records for a type.
 
-When `fetch` is unavailable, this will return the cached records in the store. Otherwise, this returns a promise that resolves to whatever gets resolved in `fetch`.
+This accepts the following option:
 
-`fetch` will be skipped even when passed-in if all records are in the cache already.
+- `fetch()` - Function that'll be use the fetch the resource
+- `include` - Object containing relationship keys as functions that'll be used to sideload them
+
+e.g.
+
+```javascript
+this.store.getAll('user', {
+  fetch() {
+    return fetch('example.com/api/users').then((response) => {
+      return response.json();
+    });
+  },
+
+  include: {
+    posts(record) {
+      return fetch(`example.com/api/users/${record.id}/posts`).then((response) => {
+        return response.json();
+      });
+    }
+  }
+})
+```
+
+When `option.fetch()` is unavailable, this'll resolve with the cached records in the store. Otherwise, this'll resolves to whatever gets resolved in `option.fetch()`.
+
+`option.fetch()` and the includes will be skipped even when passed-in if all records are in the cache already.
 
 ##### Params:
 
@@ -205,27 +230,77 @@ Type: Array | Promise
 
 Gets the record for a type and ID.
 
-When `fetch` is unavailable, this will return the cached record in the store. Otherwise, this returns a promise that resolves to whatever gets resolved in `fetch`.
+This accepts the following option:
 
-`fetch` will be skipped even when passed-in if the record is in the cache already.
+- `fetch()` - Function that'll be use the fetch the resource
+- `include` - Object containing relationship keys as functions that'll be used to sideload them
+
+e.g.
+
+```javascript
+this.store.get('user', 'user_a', {
+  fetch() {
+    return fetch('example.com/api/users/user_a').then((response) => {
+      return response.json();
+    });
+  },
+
+  include: {
+    posts() {
+      return fetch('example.com/api/users/user_a/posts').then((response) => {
+        return response.json();
+      });
+    }
+  }
+})
+```
+
+When `option.fetch()` is unavailable, this'll resolve with the cached records in the store. Otherwise, this'll resolves to whatever gets resolved in `option.fetch()`.
+
+`option.fetch()` and the includes will be skipped even when passed-in if the record has already cached.
 
 ##### Params:
 
-| Name   | Type     | Attributes | Description                                             |
-| ------ | -------- | ---------- | --------------------------------------------------------|
-| type   | string   |            |                                                         |
-| id     | string   |            |                                                         |
-| fetch  | callback | optional   | Must return a promise that resolves to the fetched data |
+| Name   | Type   | Attributes | Description |
+| ------ | -------| ---------- | ----------- |
+| type   | string |            |             |
+| id     | string |            |             |
+| option | Object | optional   |             |
 
 ##### Returns:
 
 Record for the type and ID
 
-Type: Object | Promise | undefined
+Type: Promise
 
 #### query
 
 Queries records for a type.
+
+This accepts the following option:
+
+- `fetch()` - Function that'll be use the fetch the resource
+- `include` - Object containing relationship keys as functions that'll be used to sideload them
+
+e.g.
+
+```javascript
+this.store.query('user', {
+  fetch() {
+    return fetch('example.com/api/users?age=50').then((response) => {
+      return response.json();
+    });
+  },
+
+  include: {
+    posts(record) {
+      return fetch(`example.com/api/users/${record.id}/posts`).then((response) => {
+        return response.json();
+      });
+    }
+  }
+})
+```
 
 Unlike `getAll()`, this will never return cached data.
 
@@ -253,7 +328,7 @@ This accepts the following option:
 ##### Params:
 
 | Name    | Type   | Attributes | Description |
-| --------| ------ | ---------- | ------------|
+| --------| ------ | ---------- | ----------- |
 | type    | string |            |             |
 | record  | Object |            |             |
 | option  | Object | optional   |             |
@@ -265,7 +340,7 @@ Subscribes for any changes in the state.
 ##### Params:
 
 | Name     | Type        | Attributes | Description |
-| -------- | ----------- | ---------- | ------------|
+| -------- | ----------- | ---------- | ----------- |
 | callback | callback    |            |             |
 
 ##### Returns:
@@ -285,7 +360,7 @@ This accepts the following option:
 ##### Params:
 
 | Name   | Type   | Attributes | Description |
-| -------| -------| ---------- | ------------|
+| -------| -------| ---------- | ----------- |
 | type   | string |            |             |
 | id     | string |            |             |
 | record | Object |            |             |

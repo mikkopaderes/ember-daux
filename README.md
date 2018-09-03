@@ -113,10 +113,12 @@ export default Route.extend({
   },
 
   model() {
-    return this.store.getAll('user', () => {
-      return fetch('example.com/api/users').then((response) => {
-        return response.json();
-      });
+    return this.store.getAll('user', {
+      fetch() {
+        return fetch('example.com/api/users').then((response) => {
+          return response.json();
+        });
+      },
     });
   }
 });
