@@ -742,7 +742,12 @@ module('Unit | Core | store', function () {
     assert.expect(1);
 
     // Arrange
-    const user = { id: 'user_a', name: 'User A' };
+    const user = {
+      id: 'user_a',
+      name: 'User A',
+      country: 'monaco',
+      posts: ['post_a'],
+    };
     const store = new Store(model);
 
     // Act
@@ -865,20 +870,27 @@ module('Unit | Core | store', function () {
     assert.expect(2);
 
     // Arrange
+    const include = {
+      country() {
+        return Promise.resolve({ id: 'country', name: 'Country' });
+      },
+    };
     const users = [{ id: 'user_a', name: 'User A' }, { id: 'user_b', name: 'User B' }];
     const store = new Store(model);
     const getStub = sinon.stub(store, 'get');
 
     // Act
     await store.getAll('user', {
+      include,
+
       fetch() {
         return Promise.resolve(users);
       },
     });
 
     // Assert
-    assert.ok(getStub.firstCall.calledWithExactly('user', 'user_a'));
-    assert.ok(getStub.secondCall.calledWithExactly('user', 'user_b'));
+    assert.ok(getStub.firstCall.calledWithExactly('user', 'user_a', { include }));
+    assert.ok(getStub.secondCall.calledWithExactly('user', 'user_b', { include }));
   });
 
   test('should get all record for a model type using a promise', async function (assert) {
@@ -989,20 +1001,27 @@ module('Unit | Core | store', function () {
     assert.expect(2);
 
     // Arrange
+    const include = {
+      country() {
+        return Promise.resolve({ id: 'country', name: 'Country' });
+      },
+    };
     const users = [{ id: 'user_a', name: 'User A' }, { id: 'user_b', name: 'User B' }];
     const store = new Store(model);
     const getStub = sinon.stub(store, 'get');
 
     // Act
     await store.query('user', {
+      include,
+
       fetch() {
         return Promise.resolve(users);
       },
     });
 
     // Assert
-    assert.ok(getStub.firstCall.calledWithExactly('user', 'user_a'));
-    assert.ok(getStub.secondCall.calledWithExactly('user', 'user_b'));
+    assert.ok(getStub.firstCall.calledWithExactly('user', 'user_a', { include }));
+    assert.ok(getStub.secondCall.calledWithExactly('user', 'user_b', { include }));
   });
 
   test('should query records for a model type using a promise', async function (assert) {

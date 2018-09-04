@@ -115,10 +115,10 @@ export default class Store {
       record = await option.fetch();
 
       this.set(type, record, { isBackgroundOperation: true });
+    }
 
-      if (option.include) {
-        await this.includeRelationships(type, this.getStateForRecord(type, id), option);
-      }
+    if (option.include) {
+      await this.includeRelationships(type, this.getStateForRecord(type, id), option);
     }
 
     return this.getCachedRecord(type, id);
@@ -135,17 +135,13 @@ export default class Store {
       const records = await option.fetch();
 
       records.forEach(record => this.set(type, record, { isBackgroundOperation: true }));
-
-      if (option.include) {
-        await Promise.all(records.map(record => (
-          this.includeRelationships(type, this.getStateForRecord(type, record.id), option)
-        )));
-      }
     }
 
     this.state[type].isDataComplete = true;
 
-    return Promise.all(Object.keys(this.state[type].data).map(id => this.get(type, id)));
+    return Promise.all(
+      Object.keys(this.state[type].data).map(id => this.get(type, id, { include: option.include })),
+    );
   }
 
   /**
@@ -159,13 +155,9 @@ export default class Store {
 
     records.forEach(record => this.set(type, record, { isBackgroundOperation: true }));
 
-    if (option.include) {
-      await Promise.all(records.map(record => (
-        this.includeRelationships(type, this.getStateForRecord(type, record.id), option)
-      )));
-    }
-
-    return Promise.all(records.map(record => this.get(type, record.id)));
+    return Promise.all(
+      records.map(record => this.get(type, record.id, { include: option.include })),
+    );
   }
 
   /**
@@ -314,21 +306,31 @@ export default class Store {
    * @function
    */
   async includeRelationship(type, record, option, key, descriptor) {
-    const includedData = await option.include[key](record);
-
     if (descriptor.kind === 'belongsTo') {
-      this.set(descriptor.type, includedData, { isBackgroundOperation: true });
-      this.update(type, record.id, { [key]: includedData.id }, { isBackgroundOperation: true });
-    } else {
-      includedData.forEach(data => (
-        this.set(descriptor.type, data, { isBackgroundOperation: true })
-      ));
+      if (record[key] === null || !this.isRecordAttributePopulated(descriptor.type, record[key])) {
+        const includedData = await option.include[key](record);
 
-      const includedDataIds = includedData.map(data => data.id);
+        this.set(descriptor.type, includedData, { isBackgroundOperation: true });
+        this.update(type, record.id, { [key]: includedData.id }, { isBackgroundOperation: true });
+      }
+    } else if (descriptor.kind === 'hasMany') {
+      if (
+        record[key].length === 0
+        || record[key].find(item => (
+          !this.isRecordAttributePopulated(descriptor.type, item)
+        ))
+      ) {
+        const includedData = await option.include[key](record);
 
-      this.update(type, record.id, {
-        [key]: [...record[key], ...includedDataIds],
-      }, { isBackgroundOperation: true });
+        includedData.forEach(data => (
+          this.set(descriptor.type, data, { isBackgroundOperation: true })
+        ));
+
+        const includedDataIds = includedData.map(data => data.id);
+        const uniqueHasManyIds = [...new Set([...record[key], ...includedDataIds])];
+
+        this.update(type, record.id, { [key]: uniqueHasManyIds }, { isBackgroundOperation: true });
+      }
     }
   }
 
