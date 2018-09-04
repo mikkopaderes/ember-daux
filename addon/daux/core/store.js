@@ -104,17 +104,21 @@ export default class Store {
   /**
    * @param {string} type
    * @param {string} id
-   * @param {fetch} [fetch]
+   * @param {option} [option={}]
    * @return {Object} Record
    * @function
    */
-  get(type, id, fetch) {
-    if (!this.isRecordAttributePopulated(type, id) && fetch) {
-      return fetch().then((record) => {
-        this.set(type, record, { isBackgroundOperation: true });
+  async get(type, id, option = {}) {
+    let record;
 
-        return this.getCachedRecord(type, id);
-      });
+    if (!this.isRecordAttributePopulated(type, id) && option.fetch) {
+      record = await option.fetch();
+
+      this.set(type, record, { isBackgroundOperation: true });
+
+      if (option.include) {
+        await this.includeRelationships(type, this.getStateForRecord(type, id), option);
+      }
     }
 
     return this.getCachedRecord(type, id);
@@ -122,36 +126,46 @@ export default class Store {
 
   /**
    * @param {string} type
-   * @param {fetch} [fetch]
+   * @param {option} [option={}]
    * @return {Array.<Object>} Records
    * @function
    */
-  getAll(type, fetch) {
-    if (fetch && !this.state[type].isDataComplete) {
-      return fetch().then((records) => {
-        records.forEach(record => this.set(type, record, { isBackgroundOperation: true }));
+  async getAll(type, option) {
+    if (option.fetch && !this.state[type].isDataComplete) {
+      const records = await option.fetch();
 
-        return Object.keys(this.state[type].data).map(id => this.get(type, id));
-      });
+      records.forEach(record => this.set(type, record, { isBackgroundOperation: true }));
+
+      if (option.include) {
+        await Promise.all(records.map(record => (
+          this.includeRelationships(type, this.getStateForRecord(type, record.id), option)
+        )));
+      }
     }
 
     this.state[type].isDataComplete = true;
 
-    return Object.keys(this.state[type].data).map(id => this.get(type, id));
+    return Promise.all(Object.keys(this.state[type].data).map(id => this.get(type, id)));
   }
 
   /**
    * @param {string} type
-   * @param {fetch} fetch
+   * @param {option} [option={}]
    * @return {Array.<Object>} Records
    * @function
    */
-  query(type, fetch) {
-    return fetch().then((records) => {
-      records.forEach(record => this.set(type, record, { isBackgroundOperation: true }));
+  async query(type, option) {
+    const records = await option.fetch();
 
-      return records.map(record => this.get(type, record.id));
-    });
+    records.forEach(record => this.set(type, record, { isBackgroundOperation: true }));
+
+    if (option.include) {
+      await Promise.all(records.map(record => (
+        this.includeRelationships(type, this.getStateForRecord(type, record.id), option)
+      )));
+    }
+
+    return Promise.all(records.map(record => this.get(type, record.id)));
   }
 
   /**
@@ -288,6 +302,54 @@ export default class Store {
     }
 
     return false;
+  }
+
+  /**
+   * @param {string} type
+   * @param {Object} record
+   * @param {Object} option
+   * @param {string} key
+   * @param {string} descriptor
+   * @private
+   * @function
+   */
+  async includeRelationship(type, record, option, key, descriptor) {
+    const includedData = await option.include[key](record);
+
+    if (descriptor.kind === 'belongsTo') {
+      this.set(descriptor.type, includedData, { isBackgroundOperation: true });
+      this.update(type, record.id, { [key]: includedData.id }, { isBackgroundOperation: true });
+    } else {
+      includedData.forEach(data => (
+        this.set(descriptor.type, data, { isBackgroundOperation: true })
+      ));
+
+      const includedDataIds = includedData.map(data => data.id);
+
+      this.update(type, record.id, {
+        [key]: [...record[key], ...includedDataIds],
+      }, { isBackgroundOperation: true });
+    }
+  }
+
+  /**
+   * @param {string} type
+   * @param {Object} record
+   * @param {Object} option
+   * @private
+   * @function
+   */
+  async includeRelationships(type, record, option) {
+    const { relationship } = this.model[type];
+    const includes = [];
+
+    Object.keys(relationship).forEach((key) => {
+      if (option.include[key]) {
+        includes.push(this.includeRelationship(type, record, option, key, relationship[key]));
+      }
+    });
+
+    await Promise.all(includes);
   }
 
   /**
