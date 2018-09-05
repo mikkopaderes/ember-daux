@@ -33,14 +33,17 @@ export default class Store {
     if (record.id) {
       const modelForType = this.model[type];
       const deserializedRecord = option.isDeserialized ? record : modelForType.deserialize(record);
-      const normalizedRecord = normalize(modelForType, deserializedRecord);
 
-      this.state[type].data[normalizedRecord.id] = normalizedRecord;
+      if (deserializedRecord) {
+        const normalizedRecord = normalize(modelForType, deserializedRecord);
 
-      this.syncAddedRelationships(type, deserializedRecord);
+        this.state[type].data[normalizedRecord.id] = normalizedRecord;
 
-      if (!option.isBackgroundOperation) {
-        this.subscriptions.forEach(subscription => subscription());
+        this.syncAddedRelationships(type, deserializedRecord);
+
+        if (!option.isBackgroundOperation) {
+          this.subscriptions.forEach(subscription => subscription());
+        }
       }
     } else {
       throw new Error('Record to set has no ID');
@@ -109,16 +112,20 @@ export default class Store {
    * @function
    */
   async get(type, id, option = {}) {
-    let record;
-
     if (!this.isRecordAttributePopulated(type, id) && option.fetch) {
-      record = await option.fetch();
+      const record = await option.fetch();
+
+      if (!record) {
+        return null;
+      }
 
       this.set(type, record, { isBackgroundOperation: true });
     }
 
-    if (option.include) {
-      await this.includeRelationships(type, this.getStateForRecord(type, id), option);
+    const recordState = this.getStateForRecord(type, id);
+
+    if (recordState && option.include) {
+      await this.includeRelationships(type, recordState, option);
     }
 
     return this.getCachedRecord(type, id);
@@ -132,7 +139,7 @@ export default class Store {
    */
   async getAll(type, option) {
     if (option.fetch && !this.state[type].isDataComplete) {
-      const records = await option.fetch();
+      const records = await option.fetch() || [];
 
       records.forEach(record => this.set(type, record, { isBackgroundOperation: true }));
     }
@@ -151,7 +158,7 @@ export default class Store {
    * @function
    */
   async query(type, option) {
-    const records = await option.fetch();
+    const records = await option.fetch() || [];
 
     records.forEach(record => this.set(type, record, { isBackgroundOperation: true }));
 
