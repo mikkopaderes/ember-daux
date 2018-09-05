@@ -112,10 +112,8 @@ export default class Store {
    * @function
    */
   async get(type, id, option = {}) {
-    let record;
-
     if (!this.isRecordAttributePopulated(type, id) && option.fetch) {
-      record = await option.fetch();
+      const record = await option.fetch();
 
       if (!record) {
         return null;
@@ -124,8 +122,10 @@ export default class Store {
       this.set(type, record, { isBackgroundOperation: true });
     }
 
-    if (option.include) {
-      await this.includeRelationships(type, this.getStateForRecord(type, id), option);
+    const recordState = this.getStateForRecord(type, id);
+
+    if (recordState && option.include) {
+      await this.includeRelationships(type, recordState, option);
     }
 
     return this.getCachedRecord(type, id);
@@ -158,7 +158,7 @@ export default class Store {
    * @function
    */
   async query(type, option) {
-    const records = await option.fetch();
+    const records = await option.fetch() || [];
 
     records.forEach(record => this.set(type, record, { isBackgroundOperation: true }));
 
