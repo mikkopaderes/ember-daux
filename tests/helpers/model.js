@@ -139,6 +139,10 @@ class User extends Model {
       deserializedRecord.country = 'monaco';
     }
 
+    if (record.country === 'force_null') {
+      return null;
+    }
+
     return deserializedRecord;
   }
 }

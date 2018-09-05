@@ -200,6 +200,19 @@ module('Unit | Core | store', function () {
     });
   });
 
+  test('should not set record when deserialization returns nothing', async function (assert) {
+    assert.expect(1);
+
+    // Arrange
+    const store = new Store(model);
+
+    // Act
+    store.set('user', { id: 'user_a', name: 'User A', country: 'force_null' });
+
+    // Assert
+    assert.equal(await store.get('user', 'user_a'), null);
+  });
+
   test('should throw error when setting a record without ID', function (assert) {
     assert.expect(1);
 
@@ -736,6 +749,23 @@ module('Unit | Core | store', function () {
       posts: [],
       username: null,
     });
+  });
+
+  test('should not get record for a model type using a promise that resolves to nothing', async function (assert) {
+    assert.expect(1);
+
+    // Arrange
+    const store = new Store(model);
+
+    // Act
+    const result = await store.get('user', 'user_a', {
+      fetch() {
+        return Promise.resolve();
+      },
+    });
+
+    // Assert
+    assert.equal(result, null);
   });
 
   test('should get record for a model type while including it\'s relationships using a promise', async function (assert) {
