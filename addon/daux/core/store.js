@@ -20,7 +20,7 @@ export default class Store {
   constructor(model) {
     this.model = model;
     this.state = this.buildInitialState();
-    this.subscriptions = [];
+    this.subscription = {};
   }
 
   /**
@@ -42,7 +42,7 @@ export default class Store {
         this.syncAddedRelationships(type, deserializedRecord);
 
         if (!option.isBackgroundOperation) {
-          this.subscriptions.forEach(subscription => subscription());
+          Object.keys(this.subscription).forEach(key => this.subscription[key]());
         }
       }
     } else {
@@ -73,7 +73,7 @@ export default class Store {
       this.syncRemovedRelationships(type, updatedRecord, cachedRecord);
 
       if (!option.isBackgroundOperation) {
-        this.subscriptions.forEach(subscription => subscription());
+        Object.keys(this.subscription).forEach(key => this.subscription[key]());
       }
     } else {
       throw new Error('Record doesn\'t exist');
@@ -97,7 +97,7 @@ export default class Store {
       delete this.state[type].data[id];
 
       if (!option.isBackgroundOperation) {
-        this.subscriptions.forEach(subscription => subscription());
+        Object.keys(this.subscription).forEach(key => this.subscription[key]());
       }
     } else {
       throw new Error('Record doesn\'t exist');
@@ -173,15 +173,14 @@ export default class Store {
 
   /**
    * @param {subscriptionCallback} callback
+   * @param {string} [id=Math.random().toString(32).slice(2).substr(0, 5)]
    * @return {Function} Unsubscribe function
    * @function
    */
-  subscribe(callback) {
-    this.subscriptions.push(callback);
+  subscribe(callback, id = Math.random().toString(32).slice(2).substr(0, 5)) {
+    this.subscription[id] = callback;
 
-    return () => {
-      this.subscriptions = this.subscriptions.filter(subscription => subscription !== callback);
-    };
+    return () => delete this.subscription[id];
   }
 
   /**
