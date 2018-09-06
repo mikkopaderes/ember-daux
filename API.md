@@ -337,11 +337,14 @@ This accepts the following option:
 
 Subscribes for any changes in the state.
 
+To avoid having duplicate subscriptions, you can pass-in a unique ID of your choosing.
+
 ##### Params:
 
 | Name     | Type        | Attributes | Description |
 | -------- | ----------- | ---------- | ----------- |
 | callback | callback    |            |             |
+| id       | string      | optional   |             |
 
 ##### Returns:
 
