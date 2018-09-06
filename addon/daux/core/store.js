@@ -137,7 +137,7 @@ export default class Store {
    * @return {Array.<Object>} Records
    * @function
    */
-  async getAll(type, option) {
+  async getAll(type, option = {}) {
     if (option.fetch && !this.state[type].isDataComplete) {
       const records = await option.fetch() || [];
 
@@ -157,7 +157,7 @@ export default class Store {
    * @return {Array.<Object>} Records
    * @function
    */
-  async query(type, option) {
+  async query(type, option = {}) {
     const records = await option.fetch() || [];
 
     records.forEach(record => this.set(type, record, { isBackgroundOperation: true }));
