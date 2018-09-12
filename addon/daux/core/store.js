@@ -142,9 +142,9 @@ export default class Store {
       const records = await option.fetch() || [];
 
       records.forEach(record => this.set(type, record, { isBackgroundOperation: true }));
-    }
 
-    this.state[type].isDataComplete = true;
+      this.state[type].isDataComplete = true;
+    }
 
     return Promise.all(
       Object.keys(this.state[type].data).map(id => this.get(type, id, { include: option.include })),
@@ -320,23 +320,16 @@ export default class Store {
         this.update(type, record.id, { [key]: includedData.id }, { isBackgroundOperation: true });
       }
     } else if (descriptor.kind === 'hasMany') {
-      if (
-        record[key].length === 0
-        || record[key].find(item => (
-          !this.isRecordAttributePopulated(descriptor.type, item)
-        ))
-      ) {
-        const includedData = await option.include[key](record);
+      const includedData = await option.include[key](record);
 
-        includedData.forEach(data => (
-          this.set(descriptor.type, data, { isBackgroundOperation: true })
-        ));
+      includedData.forEach(data => (
+        this.set(descriptor.type, data, { isBackgroundOperation: true })
+      ));
 
-        const includedDataIds = includedData.map(data => data.id);
-        const uniqueHasManyIds = [...new Set([...record[key], ...includedDataIds])];
+      const includedDataIds = includedData.map(data => data.id);
+      const uniqueHasManyIds = [...new Set([...record[key], ...includedDataIds])];
 
-        this.update(type, record.id, { [key]: uniqueHasManyIds }, { isBackgroundOperation: true });
-      }
+      this.update(type, record.id, { [key]: uniqueHasManyIds }, { isBackgroundOperation: true });
     }
   }
 
