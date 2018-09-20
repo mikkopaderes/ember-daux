@@ -43,7 +43,9 @@ export default function normalize(model, record) {
   const normalizedRecord = { id: record.id };
 
   model.attributes.forEach((attribute) => {
-    normalizedRecord[attribute] = record[attribute] || null;
+    normalizedRecord[attribute] = Object.prototype.hasOwnProperty.call(record, attribute)
+      ? record[attribute]
+      : null;
   });
 
   Object.keys(model.relationship).forEach((relationshipKey) => {

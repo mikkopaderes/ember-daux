@@ -21,6 +21,7 @@ module('Unit | Core | store', function () {
     // Assert
     assert.deepEqual(await store.get('user', 'user_a'), {
       id: 'user_a',
+      isAdmin: null,
       name: 'User A',
       blockedUsers: [],
       country: null,
@@ -39,10 +40,12 @@ module('Unit | Core | store', function () {
     // Act
     store.set('user', {
       id: 'user_a',
+      isAdmin: null,
       name: 'User A',
       blockedUsers: [
         {
           id: 'user_b',
+          isAdmin: null,
           name: 'User B',
           blockedUsers: [],
           country: null,
@@ -60,10 +63,12 @@ module('Unit | Core | store', function () {
     // Assert
     assert.deepEqual(await store.get('user', 'user_a'), {
       id: 'user_a',
+      isAdmin: null,
       name: 'User A',
       blockedUsers: [
         {
           id: 'user_b',
+          isAdmin: null,
           name: 'User B',
           blockedUsers: [],
           country: null,
@@ -80,6 +85,7 @@ module('Unit | Core | store', function () {
           members: [
             {
               id: 'user_a',
+              isAdmin: null,
               name: 'User A',
               blockedUsers: ['user_b'],
               country: 'monaco',
@@ -96,6 +102,7 @@ module('Unit | Core | store', function () {
           message: 'Post A',
           author: {
             id: 'user_a',
+            isAdmin: null,
             name: 'User A',
             blockedUsers: ['user_b'],
             country: 'monaco',
@@ -109,6 +116,7 @@ module('Unit | Core | store', function () {
         id: 'username_a',
         user: {
           id: 'user_a',
+          isAdmin: null,
           name: 'User A',
           blockedUsers: ['user_b'],
           country: 'monaco',
@@ -129,6 +137,7 @@ module('Unit | Core | store', function () {
     // Act
     store.set('user', {
       id: 'user_a',
+      isAdmin: null,
       name: 'User A',
       blockedUsers: ['user_b'],
       country: 'm0naco',
@@ -140,10 +149,12 @@ module('Unit | Core | store', function () {
     // Assert
     assert.deepEqual(await store.get('user', 'user_a'), {
       id: 'user_a',
+      isAdmin: null,
       name: 'User A',
       blockedUsers: [
         {
           id: 'user_b',
+          isAdmin: null,
           name: null,
           blockedUsers: [],
           country: null,
@@ -160,6 +171,7 @@ module('Unit | Core | store', function () {
           members: [
             {
               id: 'user_a',
+              isAdmin: null,
               name: 'User A',
               blockedUsers: ['user_b'],
               country: 'monaco',
@@ -176,6 +188,7 @@ module('Unit | Core | store', function () {
           message: null,
           author: {
             id: 'user_a',
+            isAdmin: null,
             name: 'User A',
             blockedUsers: ['user_b'],
             country: 'monaco',
@@ -189,6 +202,7 @@ module('Unit | Core | store', function () {
         id: 'username_a',
         user: {
           id: 'user_a',
+          isAdmin: null,
           name: 'User A',
           blockedUsers: ['user_b'],
           country: 'monaco',
@@ -239,6 +253,7 @@ module('Unit | Core | store', function () {
     // Act
     store.set('user', {
       id: 'user_a',
+      isAdmin: null,
       name: 'User A',
       username: 'username_a',
     });
@@ -246,6 +261,7 @@ module('Unit | Core | store', function () {
     // Assert
     assert.deepEqual(await store.get('user', 'user_a'), {
       id: 'user_a',
+      isAdmin: null,
       name: 'User A',
       blockedUsers: [],
       country: null,
@@ -255,6 +271,7 @@ module('Unit | Core | store', function () {
         id: 'username_a',
         user: {
           id: 'user_a',
+          isAdmin: null,
           name: 'User A',
           blockedUsers: [],
           country: null,
@@ -281,6 +298,7 @@ module('Unit | Core | store', function () {
     // Act
     store.set('user', {
       id: 'user_a',
+      isAdmin: null,
       name: 'User A',
       posts: ['post_a'],
     });
@@ -288,6 +306,7 @@ module('Unit | Core | store', function () {
     // Assert
     assert.deepEqual(await store.get('user', 'user_a'), {
       id: 'user_a',
+      isAdmin: null,
       name: 'User A',
       blockedUsers: [],
       country: null,
@@ -298,6 +317,7 @@ module('Unit | Core | store', function () {
           message: null,
           author: {
             id: 'user_a',
+            isAdmin: null,
             name: 'User A',
             blockedUsers: [],
             country: null,
@@ -326,6 +346,7 @@ module('Unit | Core | store', function () {
     // Act
     store.set('user', {
       id: 'user_a',
+      isAdmin: null,
       name: 'User A',
       groups: ['group_a'],
     });
@@ -333,6 +354,7 @@ module('Unit | Core | store', function () {
     // Assert
     assert.deepEqual(await store.get('user', 'user_a'), {
       id: 'user_a',
+      isAdmin: null,
       name: 'User A',
       blockedUsers: [],
       country: null,
@@ -343,6 +365,7 @@ module('Unit | Core | store', function () {
           members: [
             {
               id: 'user_a',
+              isAdmin: null,
               name: 'User A',
               blockedUsers: [],
               country: null,
@@ -409,6 +432,7 @@ module('Unit | Core | store', function () {
     // Assert
     assert.ok(setStub.calledWithExactly('user', {
       id: 'user_a',
+      isAdmin: null,
       name: 'User A',
       blockedUsers: [],
       country: { id: 'monaco', name: 'Monaco' },
@@ -441,6 +465,7 @@ module('Unit | Core | store', function () {
 
     store.set('user', {
       id: 'user_a',
+      isAdmin: null,
       name: 'User A',
       username: 'username_a',
     });
@@ -451,6 +476,7 @@ module('Unit | Core | store', function () {
     // Assert
     assert.deepEqual(await store.get('user', 'user_a'), {
       id: 'user_a',
+      isAdmin: null,
       name: 'User A',
       blockedUsers: [],
       country: null,
@@ -469,6 +495,7 @@ module('Unit | Core | store', function () {
 
     store.set('user', {
       id: 'user_a',
+      isAdmin: null,
       name: 'User A',
       posts: ['post_a'],
     });
@@ -479,6 +506,7 @@ module('Unit | Core | store', function () {
     // Assert
     assert.deepEqual(await store.get('user', 'user_a'), {
       id: 'user_a',
+      isAdmin: null,
       name: 'User A',
       blockedUsers: [],
       country: null,
@@ -500,6 +528,7 @@ module('Unit | Core | store', function () {
 
     store.set('user', {
       id: 'user_a',
+      isAdmin: null,
       name: 'User A',
       groups: ['group_a'],
     });
@@ -510,6 +539,7 @@ module('Unit | Core | store', function () {
     // Assert
     assert.deepEqual(await store.get('user', 'user_a'), {
       id: 'user_a',
+      isAdmin: null,
       name: 'User A',
       blockedUsers: [],
       country: null,
@@ -571,6 +601,7 @@ module('Unit | Core | store', function () {
 
     // Assert
     assert.ok(updateStub.calledWithExactly('user', 'user_a', {
+      isAdmin: null,
       name: null,
       blockedUsers: [],
       country: null,
@@ -676,6 +707,7 @@ module('Unit | Core | store', function () {
     assert.ok(fetchStub.notCalled);
     assert.deepEqual(result, {
       id: 'user_a',
+      isAdmin: null,
       name: 'User A',
       blockedUsers: [],
       country: null,
@@ -742,6 +774,7 @@ module('Unit | Core | store', function () {
     // Assert
     assert.deepEqual(result, {
       id: 'user_a',
+      isAdmin: null,
       name: 'User A',
       blockedUsers: [],
       country: null,
@@ -774,6 +807,7 @@ module('Unit | Core | store', function () {
     // Arrange
     const user = {
       id: 'user_a',
+      isAdmin: null,
       name: 'User A',
       country: 'monaco',
       posts: ['post_a'],
@@ -812,10 +846,12 @@ module('Unit | Core | store', function () {
     // Assert
     assert.deepEqual(result, {
       id: 'user_a',
+      isAdmin: null,
       name: 'User A',
       blockedUsers: [
         {
           id: 'user_b',
+          isAdmin: null,
           name: 'User B',
           blockedUsers: [],
           country: null,
@@ -832,6 +868,7 @@ module('Unit | Core | store', function () {
           members: [
             {
               id: 'user_a',
+              isAdmin: null,
               name: 'User A',
               blockedUsers: ['user_b'],
               country: 'monaco',
@@ -848,6 +885,7 @@ module('Unit | Core | store', function () {
           message: 'Post A',
           author: {
             id: 'user_a',
+            isAdmin: null,
             name: 'User A',
             blockedUsers: ['user_b'],
             country: 'monaco',
@@ -861,6 +899,7 @@ module('Unit | Core | store', function () {
         id: 'username_a',
         user: {
           id: 'user_a',
+          isAdmin: null,
           name: 'User A',
           blockedUsers: ['user_b'],
           country: 'monaco',
@@ -941,6 +980,7 @@ module('Unit | Core | store', function () {
     assert.deepEqual(result, [
       {
         id: 'user_a',
+        isAdmin: null,
         name: 'User A',
         blockedUsers: [],
         country: null,
@@ -950,6 +990,7 @@ module('Unit | Core | store', function () {
       },
       {
         id: 'user_b',
+        isAdmin: null,
         name: 'User B',
         blockedUsers: [],
         country: null,
@@ -984,6 +1025,7 @@ module('Unit | Core | store', function () {
     assert.deepEqual(result, [
       {
         id: 'user_a',
+        isAdmin: null,
         name: 'User A',
         blockedUsers: [],
         country: { id: 'monaco', name: 'Monaco' },
@@ -993,6 +1035,7 @@ module('Unit | Core | store', function () {
       },
       {
         id: 'user_b',
+        isAdmin: null,
         name: 'User B',
         blockedUsers: [],
         country: { id: 'monaco', name: 'Monaco' },
@@ -1072,6 +1115,7 @@ module('Unit | Core | store', function () {
     assert.deepEqual(result, [
       {
         id: 'user_a',
+        isAdmin: null,
         name: 'User A',
         blockedUsers: [],
         country: null,
@@ -1081,6 +1125,7 @@ module('Unit | Core | store', function () {
       },
       {
         id: 'user_b',
+        isAdmin: null,
         name: 'User B',
         blockedUsers: [],
         country: null,
@@ -1115,6 +1160,7 @@ module('Unit | Core | store', function () {
     assert.deepEqual(result, [
       {
         id: 'user_a',
+        isAdmin: null,
         name: 'User A',
         blockedUsers: [],
         country: { id: 'monaco', name: 'Monaco' },
@@ -1124,6 +1170,7 @@ module('Unit | Core | store', function () {
       },
       {
         id: 'user_b',
+        isAdmin: null,
         name: 'User B',
         blockedUsers: [],
         country: { id: 'monaco', name: 'Monaco' },

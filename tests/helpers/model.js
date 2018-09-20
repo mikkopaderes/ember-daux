@@ -93,7 +93,7 @@ class User extends Model {
    * @override
    */
   static get attributes() {
-    return ['name'];
+    return ['isAdmin', 'name'];
   }
 
   /**
