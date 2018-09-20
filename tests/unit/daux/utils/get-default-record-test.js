@@ -13,6 +13,7 @@ module('Unit | Utility | get-default-record', function () {
 
       // Assert
       assert.deepEqual(result, {
+        isAdmin: null,
         name: null,
         blockedUsers: [],
         country: null,

@@ -9,7 +9,12 @@ module('Unit | Util | normalize', function () {
       assert.expect(1);
 
       // Arrange
-      const record = { id: 'user_a', name: 'User A', foo: 'bar' };
+      const record = {
+        id: 'user_a',
+        isAdmin: false,
+        name: 'User A',
+        foo: 'bar',
+      };
 
       // Act
       const result = normalize(model.user, record);
@@ -17,6 +22,7 @@ module('Unit | Util | normalize', function () {
       // Assert
       assert.deepEqual(result, {
         id: 'user_a',
+        isAdmin: false,
         name: 'User A',
         blockedUsers: [],
         country: null,
@@ -45,6 +51,7 @@ module('Unit | Util | normalize', function () {
       // Assert
       assert.deepEqual(result, {
         id: 'user_a',
+        isAdmin: null,
         name: 'User A',
         blockedUsers: [],
         country: 'monaco',
@@ -73,6 +80,7 @@ module('Unit | Util | normalize', function () {
       // Assert
       assert.deepEqual(result, {
         id: 'user_a',
+        isAdmin: null,
         name: 'User A',
         blockedUsers: [],
         country: 'monaco',
