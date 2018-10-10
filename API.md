@@ -35,7 +35,7 @@ Commits the batched operations
 
 This accepts the following option:
 
-- `isBackgroundOperation` - When true, this won't execute the listeners for the subscribed Routes.
+- `isBackgroundOperation` - When true, this won't execute the listeners for the subscribed callbacks.
 
 ##### Params:
 
@@ -146,7 +146,7 @@ Type: Object
 
 Returns a `Daux.Core.Batch` class used for batching operations.
 
-This is for the case where you want to update the state multiple times sequentially while just triggering the listeners for the subscribed Routes **once**.
+This is for the case where you want to update the state multiple times sequentially while just triggering the listeners for the subscribed callbacks **once**.
 
 e.g.
 
@@ -170,7 +170,7 @@ Deletes a record for a type.
 
 This accepts the following option:
 
-- `isBackgroundOperation` - When true, this won't execute the listeners for the subscribed Routes.
+- `isBackgroundOperation` - When true, this won't execute the listeners for the subscribed callbacks.
 
 ##### Params:
 
@@ -323,7 +323,7 @@ Sets a record for a type.
 
 This accepts the following option:
 
-- `isBackgroundOperation` - When true, this won't execute the listeners for the subscribed Routes.
+- `isBackgroundOperation` - When true, this won't execute the listeners for the subscribed callbacks.
 
 ##### Params:
 
@@ -358,7 +358,7 @@ Updates a record for a type.
 
 This accepts the following option:
 
-- `isBackgroundOperation` - When true, this won't execute the listeners for the subscribed Routes.
+- `isBackgroundOperation` - When true, this won't execute the listeners for the subscribed callbacks.
 
 ##### Params:
 
