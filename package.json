@@ -20,6 +20,7 @@
     "test:all": "ember try:each"
   },
   "dependencies": {
+    "daux": "^0.0.2",
     "ember-cli-babel": "^6.6.0"
   },
   "devDependencies": {

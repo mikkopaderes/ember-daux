@@ -8,7 +8,7 @@ export default Route.extend({
     this.store.subscribe(() => this.refresh());
   },
 
-  model() {
+  async model() {
     const user = this.modelFor('users.user');
 
     if (user.posts.length === 0) {
@@ -20,6 +20,8 @@ export default Route.extend({
       batch.commit({ isBackgroundOperation: true });
     }
 
-    return this.store.get('user', user.id).posts;
+    const { posts } = await this.store.get('user', user.id);
+
+    return posts;
   },
 });
