@@ -19,7 +19,7 @@ Create your model at **app/models/[model-name].js**:
 
 ```javascript
 // app/models/user.js
-import { Model } from 'ember-daux/daux';
+import { Model } from 'daux';
 
 export default class User extends Model {
   static get attributes() {
