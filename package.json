@@ -1,7 +1,7 @@
 {
   "name": "ember-daux",
-  "version": "0.3.0",
-  "description": "State management for your Ember apps",
+  "version": "0.4.0",
+  "description": "Ember addon for integrating Daux",
   "keywords": [
     "ember-addon"
   ],
