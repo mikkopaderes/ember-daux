@@ -11,6 +11,8 @@ export default Route.extend({
   model(params) {
     const user = { id: params.username, name: 'Foobar' };
 
-    return this.store.get('user', params.username, () => Promise.resolve(user));
+    return this.store.get('user', params.username, {
+      fetch: () => Promise.resolve(user),
+    });
   },
 });

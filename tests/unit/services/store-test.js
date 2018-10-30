@@ -1,7 +1,7 @@
 import { setupTest } from 'ember-qunit';
 import { module, test } from 'qunit';
 
-import { Store } from 'ember-daux/daux';
+import { Store } from 'daux';
 
 module('Unit | Service | store', function (hooks) {
   setupTest(hooks);

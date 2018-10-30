@@ -1,25 +1,7 @@
 ember-daux
 ==============================================================================
 
-*This is an experimental addon (and a for fun project)*
-
-A state management solution for your Ember apps that combines some of the concepts of Ember Data and Redux.
-
-Design
-------------------------------------------------------------------------------
-
-The idea is to have an immutable model-based state in which you can subscribe to for changes.
-
-With immutable states, your Component's lifecycle hooks will now always fire when you update the value of an object or array. You'll also no longer need to listen for deep properties in your computed properties.
-
-e.g.
-
-- `Ember.computed('todos.@each.isDone')` -> `Ember.computed('todos')`
-- `Ember.computed('todos.[]')` -> `Ember.computed('todos')`
-
-What's the difference for the computed properties performance wise? I don't think there's much at the current state of Ember. I'd say it's an ergonomics issue right now.
-
-However, it's also worth noting that Ember's future with [Glimmer](https://glimmerjs.com) improves performance drastically through immutability and its [tracking pattern](https://glimmerjs.com/guides/tracked-properties). Daux should work well with it.
+Ember addon for integrating [Daux](https://github.com/dauxjs/daux)
 
 Installation
 ------------------------------------------------------------------------------
@@ -31,15 +13,13 @@ ember install ember-daux
 Usage
 ------------------------------------------------------------------------------
 
-Check out the [API reference](API.md)
-
 ### Setup your models
 
 Create your model at **app/models/[model-name].js**:
 
 ```javascript
 // app/models/user.js
-import { Model } from 'ember-daux/daux';
+import { Model } from 'daux';
 
 export default class User extends Model {
   static get attributes() {
@@ -73,9 +53,10 @@ export default class User extends Model {
     const deserializedRecord = {};
 
     Object.keys(record).forEach((key) => {
-      const camelizedKey = camelize(key);
-
-      deserializedRecord[camelizedKey] = record[key];
+      // Use name instead of display_name to match the model attributes
+      if (key === 'display_name') {
+        deserializedRecord['name'] = record[key];
+      }
     });
 
     return deserializedRecord;
@@ -98,7 +79,7 @@ export default EmberObject.extend({
 });
 ```
 
-### Fetching states
+### Injecting the `store` service
 
 ```javascript
 import { inject as service } from '@ember/service';
@@ -108,7 +89,6 @@ export default Route.extend({
   store: service('store'),
 
   beforeModel() {
-    // Call Route.refresh() whenever a state changes
     this.store.subscribe(() => this.refresh());
   },
 
@@ -120,28 +100,6 @@ export default Route.extend({
         });
       },
     });
-  }
-});
-```
-
-### Changing states
-
-```javascript
-import { inject as service } from '@ember/service';
-import Controller from '@ember/controller';
-
-export default Controller.extend({
-  store: service('store'),
-
-  actions: {
-    handleAddUser(newUser) {
-      fetch('example.com/api/users', {
-        method: 'POST',
-        body: JSON.stringify(newUser)
-      }).then(() => {
-        this.store.set('user', newUser);
-      });
-    }
   }
 });
 ```

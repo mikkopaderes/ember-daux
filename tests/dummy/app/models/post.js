@@ -1,4 +1,4 @@
-import { Model } from 'ember-daux/daux';
+import { Model } from 'daux';
 
 export default class Post extends Model {
   static get attributes() {

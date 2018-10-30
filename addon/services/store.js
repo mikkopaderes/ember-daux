@@ -1,6 +1,6 @@
 import { getOwner } from '@ember/application';
 
-import { Store } from 'ember-daux/daux';
+import { Store } from 'daux';
 
 export default {
   /**
